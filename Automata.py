@@ -369,17 +369,19 @@ class Automata():
         inicio = set(inicio) if inicio else self.estados_iniciales
         inicio = inicio.union(self.__estado_paso_vacio(inicio))
         edos_paso =set()
-        try:
-            for edo in inicio:
-                edos_paso = edos_paso.union(self.transicion(edo, palabra[0]))
-        except ValueError:
-            return {} 
+        continuar = True
+        while continuar:
+            try:
+                for edo in inicio:
+                    edos_paso = edos_paso.union(self.transicion(edo, palabra[0]))
+            except ValueError:
+                return {}
+            continuar = 0 < len(edos_paso) and 1 < len(palabra)
+            palabra = palabra[1:]
+            inicio = set(edos_paso)
         if 0 == len(edos_paso):
             return {}
-        elif 1 == len(palabra):
-            return edos_paso.union(self.__estado_paso_vacio(edos_paso))
-        else:
-            return self.transicion_extendida(palabra[1:], edos_paso)
+        return edos_paso.union(self.__estado_paso_vacio(edos_paso))
         
     def __estado_paso_vacio(self, estados) -> set:
         """
