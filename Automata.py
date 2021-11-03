@@ -1,0 +1,706 @@
+# -*- coding: utf-8 -*-
+"""
+*** Universidad Politecnica Metropolitana de Hidalgo ***
+***       Maestria en Inteligencia Artificial        ***
+***           Automatas y Lenguaje Natural           ***
+***               Producto 02 (Cte 02)               ***
+"""
+__author__ = ["Jorge Alberto Chavez Alderete", "Ruben Ramirez Gomez"]
+__contact__ = [
+    "213220158@upmh.edu.mx", "rgomez@upmh.edu.mx", "rramirez@rramirez.com",
+    "213220145@upmh.edu.mx", 
+    ]
+__copyright__ = "(c) 2021"
+__license__ = "CC BY-NC-ND"
+__date__ = "2021-10-27"
+__version__ = 1.0
+
+"""
+Caracter para palabra (caracter) vacio:
+    CODIGO ASCII 146: Æ
+    Entidad HTML: &AElig;
+"""
+
+
+import pandas as pd
+from itertools import chain, combinations
+from GAutomata import GAutomata
+from copy import deepcopy
+
+
+caracter_vacio = 'Æ'
+
+
+def conjuntoPotencia(array) -> list:
+    """
+    Calcula del conjunto potencia de un conjunto de elementos
+
+    Parameters
+    ----------
+    array : array like
+        Conjunto base sobre el cual se determinara el conjunto potencia.
+
+    Returns
+    -------
+    list
+        Conjunto potencia
+
+    """
+    s = list(array)
+    return [
+        set(tupla) 
+        for tupla in chain.from_iterable(
+                combinations(s, r) for r in range(len(s)+1))]
+
+
+def set2Str(conjunto) -> str:
+    """
+    Convierte un conjunto a su representación como cadena de texto
+
+    Parameters
+    ----------
+    conjunto : set
+        conjunto de elementos a representar como cadena.
+
+    Returns
+    -------
+    str
+        Cadena de texto que representa al conjunto.
+
+    """
+    return f"{sorted(conjunto)}".replace(
+        "'","").replace(
+            '[','{').replace(
+                ']','}')
+                
+                
+def entradas2ER(entradas) -> str:
+    """
+    Convierte un conjunto de elementos a su representación como 
+    expresion regular simple, p.e.:
+        [] => '' (Cadena vacía)
+        [0] => '0'
+        [0, 1] => '(0+1)'
+
+    Parameters
+    ----------
+    entradas : array like
+        elementos a representar.
+
+    Returns
+    -------
+    str
+        Representacion como er simple del conjunto de elementos.
+
+    """
+    if 0 == len(entradas):
+        return ""
+    elif 1 == len(entradas):
+        return entradas[0]
+    return "(" + ("+".join(sorted(set(entradas)))) + ")"
+
+
+class Automata():
+    """
+    Representación del automáta
+    """
+    __estados = set()
+    __iniciales = set()
+    __finales = set()
+    __vertices = list()
+    __alfabeto = set()
+    __grafo = None
+    __spliter_entradas = ","
+    
+    def __init__(
+            self, iniciales=[], finales=[], archivo_matriz="", 
+            spliter_entradas=",", just_struct=False):
+        """
+        Representación de un autómata, el cual puede ser o no determinista
+
+        Parameters
+        ----------
+        iniciales : list, optional
+            Lista de estados iniciales. Default [].
+        finales : list, optional
+            Lista de estados finales. Default [].
+        archivo_matriz : str, optional
+            Ruta al archivo csv con la matriz de adyacencia que representa al
+            automata. Default "".
+        spliter_entradas : str, optional
+            Divisor de elementos de entrada en la matriz de adyacencia. 
+            Default ",".
+        just_struct : Boolean, optional
+            Indica si unicámente se generará la estructura del objeto.
+            Default False.
+
+        Raises
+        ------
+        ValueError
+            Al no añadir los nodos iniciales
+            Al no añadir los nodos finales
+            Al encontrar inconsistencias en la matriz de adyacencia
+
+        Returns
+        -------
+        Automata
+
+        """
+        self.__vertices = list()
+        self.__alfabeto = set()
+        self.__grafo = None
+        if just_struct:
+            self.__iniciales = set()
+            self.__finales = set()
+            self.__estados = set()
+            self.__spliter_entradas = ","
+            return
+        if 0 == len(iniciales):
+            raise ValueError("La cantidad de nodos iniciales no puede ser 0")
+        if 0 == len(finales):
+            raise ValueError("La cantidad de nodos finales no puede ser 0")
+        self.__iniciales = set(iniciales)
+        self.__finales = set(finales)
+        dfTmp = pd.read_csv(archivo_matriz, index_col=0)
+        if len(dfTmp.columns) != len(dfTmp.index):
+            raise ValueError(
+                f"El archivo {archivo_matriz} de contener una matriz de "
+                "adyacencia cuadrada")
+        for col in dfTmp.columns:
+            if col not in dfTmp.index:
+                raise ValueError(
+                    f"La columna {col} no se encuentra en las filas")
+        for nodo in self.__iniciales.union(self.__finales):
+            if not nodo in dfTmp.columns:
+                raise ValueError(
+                    f"El nodo {nodo} no se encuentra en la matriz")
+        self.__spliter_entradas = spliter_entradas
+        self.__estados = set(dfTmp.columns)
+        for idx in dfTmp.columns:
+            for col in dfTmp.columns:
+                if not pd.isnull(dfTmp.loc[idx][col]):
+                    label = dfTmp.loc[idx][col]
+                    label = str(
+                        int(label)
+                        if 'float64' == type(label).__name__
+                        else label)
+                    entradas = [
+                        entrada.strip()
+                        for entrada in label.split(self.__spliter_entradas)]
+                    self.__vertices.append({
+                        'from': idx,
+                        'to': col,
+                        'entradas': entradas
+                        })
+                    self.__alfabeto = self.__alfabeto.union(set(entradas))
+        self.__create_graph()
+        
+    def __create_graph(self) -> None:
+        """
+        (De uso interno). Genera la represtacion gráfica del automata
+        utlizando GAutomata
+
+        Returns
+        -------
+        None.
+
+        """
+        self.__grafo = GAutomata(
+            nodos_final=self.estados_finales,
+            nodos_incial=self.estados_iniciales,
+            vertices=[
+                (
+                    vertice['from'],
+                    vertice['to'],
+                    self.__spliter_entradas.join(sorted(vertice['entradas']))
+                ) for vertice in self.vertices])
+
+    @property
+    def estados_iniciales(self) -> set:
+        """
+        Conjunto de estados iniciales del automata
+
+        Returns
+        -------
+        set.
+
+        """
+        return set(self.__iniciales)
+
+    @property
+    def estados_finales(self) -> set:
+        """
+        Conjunto de estados finales del automata
+
+        Returns
+        -------
+        set.
+
+        """
+        return set(self.__finales)
+
+    @property
+    def estados(self) -> set:
+        """
+        Conjunto de estados del automata
+
+        Returns
+        -------
+        set.
+
+        """
+        return set(self.__estados)
+
+    @property
+    def vertices(self) -> list:
+        """
+        Lista de vertices del autómata donde cada elemento es un diccionario
+        con la forma:
+            {
+                'from': str estado de inicio del vertice
+                'to': str estado del final del vértice
+                'entradas': list con elementos del alfabeto que transfieren de
+                    from a to
+            }
+
+        Returns
+        -------
+        list.
+
+        """
+        return list(self.__vertices)
+
+    @property
+    def alfabeto(self) -> set:
+        """
+        Conjunto con los elementos que forman parte del alfabeto
+
+        Returns
+        -------
+        set.
+
+        """
+        return set(self.__alfabeto)
+
+    def save_png(self, filename) -> None:
+        """
+        Almacena la representación gráfica del automata en un archivo *.png
+
+        Parameters
+        ----------
+        filename : str
+            Ruta y nombre del archivo sin extension.
+
+        Returns
+        -------
+        None.
+
+        """
+        if self.__grafo:
+            self.__grafo.guardar(filename)
+
+    def transicion(self, estado, entrada) -> set:
+        """
+        Funcion de transición.
+
+        Parameters
+        ----------
+        estado : str
+            Estado inicial.
+        entrada : str
+            Entrada con la cual se tranfiere desde el estado a otro u otros
+            estados.
+
+        Raises
+        ------
+        ValueError
+            Si el estado no pertenece al automata o la entrada no pertenece al
+            alfabeto del automata.
+
+        Returns
+        -------
+        set
+            Conjunto de estados a los cuales se transfiere desde el estado
+            utlizando la entrada, en caso de no haber estados a transferir 
+            el conjunto será vacío sde estados resultado será vacío.
+        """
+        if not estado in self.estados:
+            raise ValueError(f"El estado {estado} no se encuentra")
+        if not entrada in self.alfabeto:
+            raise ValueError(f"La entrada {entrada} no se encuentra")
+        vertices = filter(
+            lambda edo: edo['from']==estado and entrada in edo['entradas'],
+            self.vertices)
+        return set([vertice['to'] for vertice in vertices])
+    
+    def transicion_extendida(self, palabra, inicio=None) -> set:
+        """
+        Función de transición extendida
+
+        Parameters
+        ----------
+        palabra : str
+            DESCRIPTION.
+        inicio : str, array like, optional
+            Estado o estados desde los cuales comenzara a calcularse la 
+            transición extendida, en caso de no recibirse el parametro se
+            comienza a tranferir desde los estados iniciales del automata.
+            Default None.
+
+        Raises
+        ------
+        ValueError
+            Si la palabra esta vacia.
+
+        Returns
+        -------
+        set
+            Conjunto de estados a los que se ha transferido luego de
+            verificar la palabra completa. Puede estar vacio en caso de que
+            alguna palabra contenga un caracter no propio del alfabeto o bien
+            si al final de las transiciones o en un "estado intermedio" no hay 
+            estados de salida para con el caracter siguiente a verificar.
+
+        """
+        """TODO: trabaja bien sólo cuando los caracteres del alfabeto son de
+        un sólo caracter"""
+        if 0 == len(palabra):
+            raise ValueError("La palabra esta vacia")
+        inicio = set(inicio) if inicio else self.estados_iniciales
+        inicio = inicio.union(self.__estado_paso_vacio(inicio))
+        edos_paso =set()
+        try:
+            for edo in inicio:
+                edos_paso = edos_paso.union(self.transicion(edo, palabra[0]))
+        except ValueError:
+            return {} 
+        # while 1 < len(palabra) and 0 < len(edos_paso):
+            
+        if 0 == len(edos_paso):
+            return {}
+        elif 1 == len(palabra):
+            return edos_paso.union(self.__estado_paso_vacio(edos_paso))
+        else:
+            return self.transicion_extendida(palabra[1:], edos_paso)
+        
+    def __estado_paso_vacio(self, estados) -> set:
+        """
+        Devuelve los nodos adyacentes correspondientes a estados a donde se
+        puede transferir con entradas de cadena vacia
+
+        Parameters
+        ----------
+        estados : set
+            Estados de cuales se verifican entradas de cadena vacia que 
+            transfieren a otros estados.
+
+        Returns
+        -------
+        set.
+
+        """
+        if not self.acepta_caracter_vacio:
+            return set()
+        edos = set()
+        for edo in estados:
+            edos = edos.union(set([
+                vt['to']
+                for vt in self.vertices
+                if vt['from'] == edo and caracter_vacio in vt['entradas']]))
+        return edos
+
+    def verificar_palabra(self, palabra) -> bool:
+        """
+        Verifica si una palabra pertenece o no al lenguaje generado por
+        el automata
+
+        Parameters
+        ----------
+        palabra : str
+            Palabra a verificar.
+
+        Returns
+        -------
+        bool.
+        """
+        return 0 < len(self.estados_finales.intersection(
+            self.transicion_extendida(palabra)))
+
+    @property
+    def AFN2AFD(self):
+        """
+        Forma del automata como automata finito determinista.
+        
+        La transaformación se realiza utilizando el metodo planteado en
+        Hopcroft, J. et. al. (2007). Introducción a la Teoria de Automatas,
+        Lenguajes y Computación.
+
+        Returns
+        -------
+        resultado : Automata.
+
+        """
+        resultado = Automata(just_struct=True)
+        resultado.__alfabeto = self.alfabeto
+        resultado.__iniciales = set([set2Str(self.estados_iniciales)])
+        resultado.__finales = set()
+        resultado.__spliter_entradas = self.__spliter_entradas
+        resultado.__estados = set(resultado.estados_iniciales)
+        resultado.__vertices = list()
+        resultado.__grafo = None
+        conj_pot = conjuntoPotencia(self.estados)
+        for conj in conj_pot:
+            lbl_edo = set2Str(conj)
+            resultado.__estados.add(lbl_edo)
+            if 0 < len(conj.intersection(self.estados_finales)):
+                resultado.__finales.add(lbl_edo)
+            for simb in resultado.alfabeto:
+                edos_paso = set()
+                for edo in conj:
+                    edos_paso = edos_paso.union(self.transicion(edo, simb))
+                lbl2 = set2Str(edos_paso)
+                vert = [vt
+                        for vt in resultado.__vertices
+                        if vt['from'] == lbl_edo and vt['to'] == lbl2]
+                if 0 < len(vert):
+                    vert[0]['entradas'].append(simb)
+                else:
+                    resultado.__vertices.append({
+                        'from': lbl_edo,
+                        'to': set2Str(edos_paso),
+                        'entradas': [simb]
+                        })
+        resultado.__remover_inecesarios()
+        return resultado
+    
+    def __remover_inecesarios(self) -> None:
+        """
+        (De uso interno). Remueve nodos inecerarios en al automata, éstos
+        pueden ser los resultantes de automata.candidates2remove o bien estados
+        que no son finales y que tampoco transfieren a ningun otro estado.
+
+        Returns
+        -------
+        None.
+
+        """
+        vert2remove = self.candidates2remove
+        while len(vert2remove):
+            self.__estados = self.estados.difference(vert2remove)
+            self.__finales = self.estados_finales.difference(
+                vert2remove)
+            self.__vertices = [
+                vt
+                for vt in self.vertices
+                if vt['from'] in self.estados]
+            vert2remove = self.candidates2remove
+        nodos2 = set([
+            vt['to'] for vt in self.vertices
+            if vt['to'] not in self.estados_iniciales.union(
+                    self.estados_finales) and vt["to"] != vt['from']])
+        nodosFrom = set([
+            vt['from'] for vt in self.vertices
+            if vt['from'] not in self.estados_iniciales.union(
+                    self.estados_finales) and vt["to"] != vt['from']])
+        nodosSinSalida = nodos2.difference(nodosFrom)
+        self.__estados = self.estados.difference(nodosSinSalida)
+        self.__vertices = [
+            vt
+            for vt in self.vertices
+            if vt['to'] not in nodosSinSalida]
+        self.__create_graph()
+
+    @property
+    def candidates2remove(self) -> set:
+        """
+        Nodos candidatos a ser removidos del automata sin alterar el lenguaje
+        generado, tipicamente estos estados seran los nodos que no son
+        iniciales pero que ademas tampoco son resultado de alguna transición
+        desde otros nodos
+
+        Returns
+        -------
+        set.
+
+        """
+        vert_in = set([
+            vt['to'] for vt in self.__vertices
+            ]).union(self.estados_iniciales)
+        vert2remove = self.estados.difference(vert_in)
+        vert_ciclo = set([
+            vt['to'] for vt in self.vertices if vt['from'] == vt['to']])
+        vert_in_cicle = set([vt['to'] for vt in self.vertices if vt['from'] != vt['to'] and vt['to'] in vert_ciclo])
+        return vert2remove.union(
+            vert_ciclo.difference(vert_in_cicle)
+            ).difference(
+                self.estados_iniciales)
+    
+    @property
+    def isAFN(self) -> bool:
+        """
+        Indica si es automata es o no un automata finito no determinista
+
+        Returns
+        -------
+        bool.
+
+        """
+        verts = set([vt['from'] for vt in self.vertices])
+        for vert in verts:
+            entradas = list()
+            for vt in self.vertices:
+                if vt['from'] == vert:
+                    for entrada in vt['entradas']:
+                        if entrada in entradas:
+                            return True
+                        else:
+                            entradas.append(entrada)
+        return False
+    
+    @property
+    def acepta_caracter_vacio(self) -> bool:
+        """
+        Indica si se acepta o no el caracter como palabra vacia (epsilon),
+        se realiza con base en el alfabeto del automata.
+
+        Returns
+        -------
+        bool.
+
+        """
+        return caracter_vacio in self.alfabeto
+    
+    def __get_entradas(self, nodo_from, nodo_to) -> list:
+        """
+        (De uso interno). Obtiene las diferentes entradas de un nodo a otro,
+        las simplifica en caso de que existan multiples vertices
+
+        Parameters
+        ----------
+        nodo_from : str
+            Nodo incial.
+        nodo_to : str
+            Nodo final.
+
+        Returns
+        -------
+        list.
+
+        """
+        aux = []
+        for vt in self.vertices:
+            if vt['from'] == nodo_from and vt['to'] == nodo_to:
+                aux += vt['entradas']
+        return aux
+    
+    def __reduce_no_finales(self) -> None:
+        """
+        (De uso interno). Empleado en el cálculo de expresiones regulares
+        para con el automata, simplifica el aútomata utilizando eliminación
+        de estados hasta dejar solo estados iniciales y finales, como se
+        indica en Hopcroft, J. et. al. (2007). Introducción a la Teoria de
+        Automatas, Lenguajes y Computación.
+
+        Returns
+        -------
+        None.
+
+        """
+        edos2reduce = self.estados.difference(
+            self.estados_iniciales.union(self.estados_finales))
+        for edo in edos2reduce:
+            nodos_ant = set([
+                vt['from']
+                for vt in self.vertices
+                if vt['to'] == edo and vt['from'] != vt['to']])
+            nodos_suc = set([
+                vt['to']
+                for vt in self.vertices
+                if vt['from'] == edo and vt['from'] != vt['to']])
+            S = entradas2ER(self.__get_entradas(edo, edo))
+            for nin in nodos_ant:
+                Q = entradas2ER(self.__get_entradas(nin, edo))
+                for nout in nodos_suc:
+                    R = entradas2ER(self.__get_entradas(nin, nout))
+                    P = entradas2ER(self.__get_entradas(edo, nout))
+                    new_vertice = []
+                    new_vertice_2 = ""
+                    if R:
+                        new_vertice.append(R)
+                        self.__vertices = [
+                            vt
+                            for vt in self.vertices
+                            if vt['from'] != nin and vt['to'] != nout]
+                    new_vertice_2 += Q
+                    if S:
+                        new_vertice_2 += S + "*"
+                    new_vertice_2 += P
+                    if new_vertice_2:
+                        new_vertice.append(new_vertice_2)
+                    self.__vertices.append({
+                        'from': nin, 'to': nout, 'entradas':new_vertice})
+            self.__estados.remove(edo)
+            self.__vertices = [
+                vt
+                for vt in self.vertices
+                if vt['from'] != edo and vt['to'] != edo]
+            self.__create_graph()
+    
+    @property
+    def asRE(self) -> str:
+        """
+        Expresion regular equivalente al automata. Se calcula de forma "tonta"
+        utilizando el método planteado en Hopcroft, J. et. al. (2007). 
+        Introducción a la Teoria de Automatas, Lenguajes y Computación.
+
+        Raises
+        ------
+        TypeError
+            En caso de que el automata no tenga estados inciales o bien si
+            tiene más de un estado inicial.
+
+        Returns
+        -------
+        str.
+
+        """
+        if 1 != len(self.estados_iniciales):
+            raise TypeError("El automata debe tener solo un estado inicial")
+        autom = deepcopy(self)
+        autom.__reduce_no_finales()
+        nInicial = list(autom.estados_iniciales)[0]
+        expresiones = []
+        for edo in autom.estados_finales:
+            autom_tmp = deepcopy(autom)
+            autom_tmp.__finales = {edo}
+            autom_tmp.__remover_inecesarios()
+            autom_tmp.__reduce_no_finales()
+            if edo == nInicial:
+                R = entradas2ER(autom_tmp.__get_entradas(edo, edo))
+                expresiones.append(R + "*")
+            else:
+                R = entradas2ER(autom_tmp.__get_entradas(nInicial, nInicial))
+                S = entradas2ER(autom_tmp.__get_entradas(nInicial, edo))
+                U = entradas2ER(autom_tmp.__get_entradas(edo, edo))
+                T = entradas2ER(autom_tmp.__get_entradas(edo, nInicial))
+                er = ""
+                if R:
+                    er += R
+                SU = ""
+                if S:
+                    SU += S
+                if U:
+                    SU += U + "*"
+                SUT = SU
+                if T:
+                    SUT += T
+                else:
+                    SUT = ""
+                if R and SUT:
+                    er += "+"
+                er += SUT
+                if 0 < len(er):
+                    expresiones.append(f"({er})*{SU}")
+                else:
+                    expresiones.append(f"{SU}")
+        return "(" + (")+(".join(set(expresiones))) + ")"

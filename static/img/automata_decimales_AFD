@@ -1,0 +1,22 @@
+digraph {
+	rankdir=LR
+	node [shape=doublecircle]
+	"{q5}"
+	node [shape=circle]
+	node [shape=circle]
+	"{q0}"
+	node [shape=plain]
+	inicio -> "{q0}"
+	node [shape=circle]
+	node [shape=circle]
+	"{q0}" -> "{q1}" [label="+,-,Æ"]
+	"{q2}" -> "{q3}" [label="0,1,2,3,4,5,6,7,8,9"]
+	"{q1}" -> "{q1, q4}" [label="0,1,2,3,4,5,6,7,8,9"]
+	"{q1}" -> "{q2}" [label="."]
+	"{q3}" -> "{q3}" [label="0,1,2,3,4,5,6,7,8,9"]
+	"{q3}" -> "{q5}" [label="Æ"]
+	"{q2, q3}" -> "{q3}" [label="0,1,2,3,4,5,6,7,8,9"]
+	"{q2, q3}" -> "{q5}" [label="Æ"]
+	"{q1, q4}" -> "{q1, q4}" [label="0,1,2,3,4,5,6,7,8,9"]
+	"{q1, q4}" -> "{q2, q3}" [label="."]
+}
