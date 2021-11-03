@@ -28,7 +28,7 @@ from GAutomata import GAutomata
 from copy import deepcopy
 
 
-caracter_vacio = chr(146)
+caracter_vacio = chr(198)
 
 
 def conjuntoPotencia(array) -> list:
@@ -367,13 +367,7 @@ class Automata():
         if 0 == len(palabra):
             raise ValueError("La palabra esta vacia")
         inicio = set(inicio) if inicio else self.estados_iniciales
-        if self.acepta_caracter_vacio:
-            for nodo in inicio:
-                inicio = inicio.union(set([
-                    vt['to']
-                    for vt in self.vertices
-                    if vt['from'] == nodo and caracter_vacio in vt[
-                            'entradas']]))
+        inicio = inicio.union(self.__estado_paso_vacio(inicio))
         edos_paso =set()
         try:
             for edo in inicio:
@@ -383,17 +377,32 @@ class Automata():
         if 0 == len(edos_paso):
             return {}
         elif 1 == len(palabra):
-            res = edos_paso
-            if self.acepta_caracter_vacio:
-                for nodo in res:
-                    res = res.union(set([
-                        vt['to']
-                        for vt in self.vertices
-                        if vt['from'] == nodo and caracter_vacio in vt[
-                                'entradas']]))
-            return res
+            return edos_paso.union(self.__estado_paso_vacio(edos_paso))
         else:
             return self.transicion_extendida(palabra[1:], edos_paso)
+        
+    def __estado_paso_vacio(self, estados) -> set:
+        """
+        Devuelve los nodos adyacentes correspondientes a estados a donde se
+        puede transferir con entradas de cadena vacia
+        Parameters
+        ----------
+        estados : set
+            Estados de cuales se verifican entradas de cadena vacia que 
+            transfieren a otros estados.
+        Returns
+        -------
+        set.
+        """
+        if not self.acepta_caracter_vacio:
+            return set()
+        edos = set()
+        for edo in estados:
+            edos = edos.union(set([
+                vt['to']
+                for vt in self.vertices
+                if vt['from'] == edo and caracter_vacio in vt['entradas']]))
+        return edos
 
     def verificar_palabra(self, palabra) -> bool:
         """
