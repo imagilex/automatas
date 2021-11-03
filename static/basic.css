@@ -1,0 +1,11 @@
+/*
+Definición de estilos propios
+*/
+footer, p.h3 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#word-test-frm div.row {
+    margin-bottom: 10px;
+}
