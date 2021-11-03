@@ -17,7 +17,7 @@ __version__ = 1.0
 
 """
 Caracter para palabra (caracter) vacio:
-    CODIGO ASCII 146: Æ
+    CODIGO ASCII 146
     Entidad HTML: &AElig;
 """
 
@@ -28,7 +28,7 @@ from GAutomata import GAutomata
 from copy import deepcopy
 
 
-caracter_vacio = 'Æ'
+caracter_vacio = chr(198)
 
 
 def conjuntoPotencia(array) -> list:
@@ -55,7 +55,7 @@ def conjuntoPotencia(array) -> list:
 
 def set2Str(conjunto) -> str:
     """
-    Convierte un conjunto a su representación como cadena de texto
+    Convierte un conjunto a su representacion como cadena de texto
 
     Parameters
     ----------
@@ -76,9 +76,9 @@ def set2Str(conjunto) -> str:
                 
 def entradas2ER(entradas) -> str:
     """
-    Convierte un conjunto de elementos a su representación como 
+    Convierte un conjunto de elementos a su representacion como 
     expresion regular simple, p.e.:
-        [] => '' (Cadena vacía)
+        [] => '' (Cadena vacia)
         [0] => '0'
         [0, 1] => '(0+1)'
 
@@ -102,7 +102,7 @@ def entradas2ER(entradas) -> str:
 
 class Automata():
     """
-    Representación del automáta
+    Representacion del automata
     """
     __estados = set()
     __iniciales = set()
@@ -116,7 +116,7 @@ class Automata():
             self, iniciales=[], finales=[], archivo_matriz="", 
             spliter_entradas=",", just_struct=False):
         """
-        Representación de un autómata, el cual puede ser o no determinista
+        Representacion de un automata, el cual puede ser o no determinista
 
         Parameters
         ----------
@@ -131,14 +131,14 @@ class Automata():
             Divisor de elementos de entrada en la matriz de adyacencia. 
             Default ",".
         just_struct : Boolean, optional
-            Indica si unicámente se generará la estructura del objeto.
+            Indica si unicamente se generara la estructura del objeto.
             Default False.
 
         Raises
         ------
         ValueError
-            Al no añadir los nodos iniciales
-            Al no añadir los nodos finales
+            Al no aniadir los nodos iniciales
+            Al no aniadir los nodos finales
             Al encontrar inconsistencias en la matriz de adyacencia
 
         Returns
@@ -197,7 +197,7 @@ class Automata():
         
     def __create_graph(self) -> None:
         """
-        (De uso interno). Genera la represtacion gráfica del automata
+        (De uso interno). Genera la represtacion grafica del automata
         utlizando GAutomata
 
         Returns
@@ -254,11 +254,11 @@ class Automata():
     @property
     def vertices(self) -> list:
         """
-        Lista de vertices del autómata donde cada elemento es un diccionario
+        Lista de vertices del automata donde cada elemento es un diccionario
         con la forma:
             {
                 'from': str estado de inicio del vertice
-                'to': str estado del final del vértice
+                'to': str estado del final del vertice
                 'entradas': list con elementos del alfabeto que transfieren de
                     from a to
             }
@@ -284,7 +284,7 @@ class Automata():
 
     def save_png(self, filename) -> None:
         """
-        Almacena la representación gráfica del automata en un archivo *.png
+        Almacena la representacion grafica del automata en un archivo *.png
 
         Parameters
         ----------
@@ -301,7 +301,7 @@ class Automata():
 
     def transicion(self, estado, entrada) -> set:
         """
-        Funcion de transición.
+        Funcion de transicion.
 
         Parameters
         ----------
@@ -322,7 +322,7 @@ class Automata():
         set
             Conjunto de estados a los cuales se transfiere desde el estado
             utlizando la entrada, en caso de no haber estados a transferir 
-            el conjunto será vacío sde estados resultado será vacío.
+            el conjunto sera vacio sde estados resultado sera vacio.
         """
         if not estado in self.estados:
             raise ValueError(f"El estado {estado} no se encuentra")
@@ -335,7 +335,7 @@ class Automata():
     
     def transicion_extendida(self, palabra, inicio=None) -> set:
         """
-        Función de transición extendida
+        Funcion de transicion extendida
 
         Parameters
         ----------
@@ -343,7 +343,7 @@ class Automata():
             DESCRIPTION.
         inicio : str, array like, optional
             Estado o estados desde los cuales comenzara a calcularse la 
-            transición extendida, en caso de no recibirse el parametro se
+            transicion extendida, en caso de no recibirse el parametro se
             comienza a tranferir desde los estados iniciales del automata.
             Default None.
 
@@ -362,8 +362,8 @@ class Automata():
             estados de salida para con el caracter siguiente a verificar.
 
         """
-        """TODO: trabaja bien sólo cuando los caracteres del alfabeto son de
-        un sólo caracter"""
+        """TODO: trabaja bien solo cuando los caracteres del alfabeto son de
+        un solo caracter"""
         if 0 == len(palabra):
             raise ValueError("La palabra esta vacia")
         inicio = set(inicio) if inicio else self.estados_iniciales
@@ -374,8 +374,6 @@ class Automata():
                 edos_paso = edos_paso.union(self.transicion(edo, palabra[0]))
         except ValueError:
             return {} 
-        # while 1 < len(palabra) and 0 < len(edos_paso):
-            
         if 0 == len(edos_paso):
             return {}
         elif 1 == len(palabra):
@@ -387,17 +385,14 @@ class Automata():
         """
         Devuelve los nodos adyacentes correspondientes a estados a donde se
         puede transferir con entradas de cadena vacia
-
         Parameters
         ----------
         estados : set
             Estados de cuales se verifican entradas de cadena vacia que 
             transfieren a otros estados.
-
         Returns
         -------
         set.
-
         """
         if not self.acepta_caracter_vacio:
             return set()
@@ -431,9 +426,9 @@ class Automata():
         """
         Forma del automata como automata finito determinista.
         
-        La transaformación se realiza utilizando el metodo planteado en
-        Hopcroft, J. et. al. (2007). Introducción a la Teoria de Automatas,
-        Lenguajes y Computación.
+        La transaformacion se realiza utilizando el metodo planteado en
+        Hopcroft, J. et. al. (2007). Introduccion a la Teoria de Automatas,
+        Lenguajes y Computacion.
 
         Returns
         -------
@@ -475,7 +470,7 @@ class Automata():
     
     def __remover_inecesarios(self) -> None:
         """
-        (De uso interno). Remueve nodos inecerarios en al automata, éstos
+        (De uso interno). Remueve nodos inecerarios en al automata, estos
         pueden ser los resultantes de automata.candidates2remove o bien estados
         que no son finales y que tampoco transfieren a ningun otro estado.
 
@@ -515,7 +510,7 @@ class Automata():
         """
         Nodos candidatos a ser removidos del automata sin alterar el lenguaje
         generado, tipicamente estos estados seran los nodos que no son
-        iniciales pero que ademas tampoco son resultado de alguna transición
+        iniciales pero que ademas tampoco son resultado de alguna transicion
         desde otros nodos
 
         Returns
@@ -595,11 +590,11 @@ class Automata():
     
     def __reduce_no_finales(self) -> None:
         """
-        (De uso interno). Empleado en el cálculo de expresiones regulares
-        para con el automata, simplifica el aútomata utilizando eliminación
+        (De uso interno). Empleado en el calculo de expresiones regulares
+        para con el automata, simplifica el automata utilizando eliminacion
         de estados hasta dejar solo estados iniciales y finales, como se
-        indica en Hopcroft, J. et. al. (2007). Introducción a la Teoria de
-        Automatas, Lenguajes y Computación.
+        indica en Hopcroft, J. et. al. (2007). Introduccion a la Teoria de
+        Automatas, Lenguajes y Computacion.
 
         Returns
         -------
@@ -650,14 +645,14 @@ class Automata():
     def asRE(self) -> str:
         """
         Expresion regular equivalente al automata. Se calcula de forma "tonta"
-        utilizando el método planteado en Hopcroft, J. et. al. (2007). 
-        Introducción a la Teoria de Automatas, Lenguajes y Computación.
+        utilizando el metodo planteado en Hopcroft, J. et. al. (2007). 
+        Introduccion a la Teoria de Automatas, Lenguajes y Computacion.
 
         Raises
         ------
         TypeError
             En caso de que el automata no tenga estados inciales o bien si
-            tiene más de un estado inicial.
+            tiene mas de un estado inicial.
 
         Returns
         -------

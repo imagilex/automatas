@@ -1,5 +1,5 @@
 """
-Funciones de apoyo para la contextualización y uso de la clase Automata para
+Funciones de apoyo para la contextualizacion y uso de la clase Automata para
 con la UI
 """
 from os.path import isfile
@@ -13,13 +13,13 @@ from os import remove, path
 def check_img_automata(automata, file):
     """
     Verifica si se ha generado el archivo correspondiente a un automata, en
-    caso de que no sea así crea un archivo *.png con la representación visual
+    caso de que no sea asi crea un archivo *.png con la representacion visual
     del automata
 
     Parameters
     ----------
     automata : Automata
-        Automata del cual se verificara la existencia de su represntación
+        Automata del cual se verificara la existencia de su represntacion
         visual.
     file : str
         Archivo a validar de existencia o a ejecutar su creacion, no es
@@ -44,13 +44,13 @@ def check_words(palabras, automatas) -> str:
         Lista de palabras a revisar.
     automatas : dict
         Diccionario con los automatas y su nombre para con los cuales se
-        realizará la validación de palabras.
+        realizara la validacion de palabras.
 
     Returns
     -------
     str
         Cadena HTML que representa una tabla en la cual se incluyen los
-        resultados de la validación de las palabras.
+        resultados de la validacion de las palabras.
 
     """
     resultados = []
@@ -106,7 +106,7 @@ def mk_test_lst(alfabeto, largo_palabra, vacio=set(), test_size=50) -> list:
     Parameters
     ----------
     alfabeto : set
-        Alfabeto sobre el cual se generarán las palabras aleatorias.
+        Alfabeto sobre el cual se generaran las palabras aleatorias.
     largo_palabra : int
         Longitud de las palabras a generar.
     vacio : set, optional

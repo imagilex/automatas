@@ -22,10 +22,10 @@ from random import randint
 from tabulate import tabulate
 
 
-automataAFN = Automata(['q0'], ['q5'], 'automata_decimales.csv')
-automataAFN.save_png("automata_decimales_AFN")
+automataAFN = Automata(['q0'], ['q5'], 'data/automata_decimales.csv')
+automataAFN.save_png("tmp/automata_decimales_AFN")
 automataAFD = automataAFN.AFN2AFD
-automataAFD.save_png("automata_decimales_AFD")
+automataAFD.save_png("tmp/automata_decimales_AFD")
 
 palabras = [
     '-907.988', '252.865', '269.26', '543.21',

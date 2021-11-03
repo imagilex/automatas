@@ -15,7 +15,7 @@
         <div class="row">
             <label for="words2test" class="col-sm-2 col-form-label">
                 Palabras a revisar
-                <span class="badge bg-secondary text-wrap fw-bold" data-bs-toggle="tooltip" title="Puede ingresar varias palabras, una por cada línea">?</span>:
+                <span class="badge bg-secondary text-wrap fw-bold" data-bs-toggle="tooltip" title="Puede ingresar varias palabras, una por cada linea">?</span>:
             </label>
             <div class="col-sm-10">
                 <textarea name="words2test" id="words2test" cols="30" rows="10" class="form-control" required="required">{% if palabras %}{{ palabras }}{% endif %}</textarea>
@@ -24,7 +24,7 @@
         <div class="row">
             <label for="captcha_value" class="col-sm-2 col-form-label">
                 Captcha
-                <span class="badge bg-secondary text-wrap fw-bold" data-bs-toggle="tooltip" title="Se muestras sólo letras en minúsculas y números">?</span>:
+                <span class="badge bg-secondary text-wrap fw-bold" data-bs-toggle="tooltip" title="Se muestras solo letras en minusculas y numeros">?</span>:
             </label>
             <div class="col-sm-10">
                 <img src="{{ url_for('static', filename='captcha') }}/{{ captcha }}.png" class="img-fluid rounded" />
@@ -43,12 +43,12 @@
         <input type="hidden" name="captcha" id="captcha" value="{{ captcha }}" />
     </form>
 
-    <p class="h3">Autómata a revisar AFN:</p>
+    <p class="h3">Automata a revisar AFN:</p>
 
     <img src="{{ url_for("static", filename="img/automata_decimales_AFN.png") }}" class="img-fluid rounded mx-auto d-block"/>
     <div class="row">
         <div class="col-sm-6">
-            Expresión Regular Autogenerada
+            Expresion Regular Autogenerada
             <a href="#Nota-1"><sup>[1]</sup></a>
             <a href="#Nota-2"><sup>[2]</sup></a>:
         </div>
@@ -64,7 +64,7 @@
     <img src="{{ url_for("static", filename="img/automata_decimales_AFD.png") }}" class="img-fluid rounded mx-auto d-block"/>
     <div class="row">
         <div class="col-sm-6">
-            Expresión Regular Autogenerada
+            Expresion Regular Autogenerada
             <a href="#Nota-1"><sup>[1]</sup></a>
             <a href="#Nota-2"><sup>[2]</sup></a>:
         </div>
@@ -98,10 +98,10 @@
 
     <p class="h5">Notas</p>
     <div id="Nota-1">
-        <strong>[1]:</strong> El caracter <span class="badge bg-primary text-wrap fw-bold fs-5">{{ car_vacio }}</span> (código {{ car_vacio_code }}) corresponde a la representación de cadena vacía en estos automatas en particular
+        <strong>[1]:</strong> El caracter <span class="badge bg-primary text-wrap fw-bold fs-5">{{ car_vacio }}</span> (codigo {{ car_vacio_code }}) corresponde a la representacion de cadena vacia en estos automatas en particular
     </div>
     <div id="Nota-2">
-        <strong>[2]:</strong> La expresión regular se obtiene automáticamente utilizando el método de eliminación de estados.
+        <strong>[2]:</strong> La expresion regular se obtiene automaticamente utilizando el metodo de eliminacion de estados.
     </div>
 
 {% endblock %}

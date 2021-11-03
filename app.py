@@ -1,17 +1,8 @@
 """
-Funciones necesarias para la ejecución del autómata en un entorno web
-(utilizando flask) para la implementación de la UI 
+Funciones necesarias para la ejecucion del automata en un entorno web
+(utilizando flask) para la implementacion de la UI 
 """
 
-"""
-Ejecutar con:
-    export FLASK_ENV=development
-    export FLASK_APP=app.py
-    python -m flask run
-
-
-set "FLASK_ENV=development"
-"""
 from flask import Flask, render_template, request
 from Automata import Automata, caracter_vacio
 import site_helpers as hp
