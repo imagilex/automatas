@@ -9,6 +9,17 @@ import site_helpers as hp
 
 app = Flask(__name__)
 
+palabras = [
+    '0.241565+6',
+    '.-97656.6.',
+    
+    
+    '1.-+3..9-6',
+    '2358-44-.4',
+    '.--+-00976',
+    '-78+.343+6',
+    ]
+
 @app.route('/')
 def index() -> str:
     """
