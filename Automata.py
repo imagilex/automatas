@@ -367,10 +367,10 @@ class Automata():
         if 0 == len(palabra):
             raise ValueError("La palabra esta vacia")
         inicio = set(inicio) if inicio else self.estados_iniciales
-        inicio = inicio.union(self.__estado_paso_vacio(inicio))
-        edos_paso =set()
         continuar = True
         while continuar:
+            inicio = inicio.union(self.__estado_paso_vacio(inicio))
+            edos_paso =set()
             try:
                 for edo in inicio:
                     edos_paso = edos_paso.union(self.transicion(edo, palabra[0]))

@@ -36,6 +36,17 @@ palabras = [
     '+796271', '366.754', '+944.312', '-468.231',
     '-177.612', ]
 
+palabras += [
+    '0.241565+6',
+    '.-97656.6.',
+    
+    
+    '1.-+3..9-6',
+    '2358-44-.4',
+    '.--+-00976',
+    '-78+.343+6',
+    ]
+
 test_results = []
 
 for palabra in palabras:
@@ -74,7 +85,7 @@ print(tabulate(
 print(f"{automataAFN.asRE =}")
 print(f"{automataAFD.asRE =}")
 
-automata = Automata(['A'], ['C', 'D'], 'ejemplo_2.csv')
-automata.save_png("automata")
+automata = Automata(['A'], ['C', 'D'], 'data/ejemplo_2.csv')
+automata.save_png("tmp/automata")
 print(f"{automata.asRE =}")
 print(f"{automata.AFN2AFD.asRE =}")
