@@ -87,5 +87,6 @@ print(f"{automataAFD.asRE =}")
 
 automata = Automata(['A'], ['C', 'D'], 'data/ejemplo_2.csv')
 automata.save_png("tmp/automata")
+automata.AFN2AFD.save_png("tmp/automataD")
 print(f"{automata.asRE =}")
 print(f"{automata.AFN2AFD.asRE =}")

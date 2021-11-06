@@ -93,11 +93,72 @@ def entradas2ER(entradas) -> str:
         Representacion como er simple del conjunto de elementos.
 
     """
-    if 0 == len(entradas):
-        return ""
-    elif 1 == len(entradas):
+    if 1 == len(entradas) and "TerminoER" == type(entradas[0]).__name__:
         return entradas[0]
-    return "(" + ("+".join(sorted(set(entradas)))) + ")"
+    return None if 0 == len(entradas) else TerminoER(terminos=entradas)
+
+
+class TerminoER:
+    def __init__(self, siguienteTermino=None, terminos=None, reqKleene=False):
+        # Termino siguiente a concatenar
+        self.nextTermino = siguienteTermino
+        self.requiereClausulaKleene = reqKleene
+        # Terminos a unir
+        self.terminos = list()
+        for term in terminos:
+            self.unirTermino(term)
+                
+    def unirTermino(self, termino):
+        if termino and not termino in self.terminos:
+            if "TerminoER" == type(termino).__name__:
+                new_terms = list()
+                aniadido = False
+                for term in self.terminos:
+                    if "TerminoER" == type(term).__name__:
+                        if (termino.terminos == term.terminos and 
+                                termino.requiereClausulaKleene == \
+                                    term.requiereClausulaKleene):
+                            t1 = TerminoER(
+                                terminos=termino.terminos,
+                                reqKleene=termino.requiereClausulaKleene)
+                            t2 = TerminoER(terminos=[
+                                term.nextTermino, termino.nextTermino])
+                            t1.concatenarTermino(t2)
+                            new_terms.append(t1)
+                            aniadido = True
+                            continue
+                    new_terms.append(term)
+                if not aniadido:
+                    new_terms.append(termino)
+                self.terminos = new_terms
+            else:
+                self.terminos.append(termino)
+            
+    def concatenarTermino(self, termino):
+        current = self
+        while current.nextTermino:
+            current = current.nextTermino
+        current.nextTermino = termino
+        
+    def __str__(self) -> str:
+        """
+        Conversion a cadena de texto
+
+        Returns
+        -------
+        str
+
+        """
+        cadena = ""
+        if 1 == len(self.terminos):
+            cadena = str(self.terminos[0])
+        elif 1 < len(self.terminos):
+            cadena = f"({'+'.join(sorted([str(t) for t in self.terminos]))})"
+        if self.requiereClausulaKleene:
+            cadena += "*"
+        if self.nextTermino:
+            cadena += str(self.nextTermino)
+        return cadena
 
 
 class Automata():
@@ -193,7 +254,6 @@ class Automata():
                         'entradas': entradas
                         })
                     self.__alfabeto = self.__alfabeto.union(set(entradas))
-        self.__create_graph()
         
     def __create_graph(self) -> None:
         """
@@ -212,7 +272,8 @@ class Automata():
                 (
                     vertice['from'],
                     vertice['to'],
-                    self.__spliter_entradas.join(sorted(vertice['entradas']))
+                    self.__spliter_entradas.join(sorted([
+                        str(e) for e in vertice['entradas']]))
                 ) for vertice in self.vertices])
 
     @property
@@ -296,6 +357,7 @@ class Automata():
         None.
 
         """
+        self.__create_graph()
         if self.__grafo:
             self.__grafo.guardar(filename)
 
@@ -505,7 +567,6 @@ class Automata():
             vt
             for vt in self.vertices
             if vt['to'] not in nodosSinSalida]
-        self.__create_graph()
 
     @property
     def candidates2remove(self) -> set:
@@ -615,33 +676,34 @@ class Automata():
                 for vt in self.vertices
                 if vt['from'] == edo and vt['from'] != vt['to']])
             S = entradas2ER(self.__get_entradas(edo, edo))
+            if S:
+                S.requiereClausulaKleene = True
             for nin in nodos_ant:
                 Q = entradas2ER(self.__get_entradas(nin, edo))
                 for nout in nodos_suc:
                     R = entradas2ER(self.__get_entradas(nin, nout))
                     P = entradas2ER(self.__get_entradas(edo, nout))
-                    new_vertice = []
-                    new_vertice_2 = ""
                     if R:
-                        new_vertice.append(R)
                         self.__vertices = [
                             vt
                             for vt in self.vertices
-                            if vt['from'] != nin and vt['to'] != nout]
-                    new_vertice_2 += Q
+                            if vt['from'] != nin or vt['to'] != nout]
+                    new_vertice = deepcopy(Q)
                     if S:
-                        new_vertice_2 += S + "*"
-                    new_vertice_2 += P
-                    if new_vertice_2:
-                        new_vertice.append(new_vertice_2)
-                    self.__vertices.append({
-                        'from': nin, 'to': nout, 'entradas':new_vertice})
+                        new_vertice.concatenarTermino(deepcopy(S))
+                    new_vertice.concatenarTermino(P)
+                    if R:
+                        new_vertice = TerminoER(terminos=[R, new_vertice])
+                        self.__vertices.append({
+                            'from': nin, 'to': nout, 'entradas': new_vertice.terminos})
+                    else:
+                        self.__vertices.append({
+                            'from': nin, 'to': nout, 'entradas': [new_vertice]})
             self.__estados.remove(edo)
             self.__vertices = [
                 vt
                 for vt in self.vertices
                 if vt['from'] != edo and vt['to'] != edo]
-            self.__create_graph()
     
     @property
     def asRE(self) -> str:
@@ -673,31 +735,27 @@ class Automata():
             autom_tmp.__remover_inecesarios()
             autom_tmp.__reduce_no_finales()
             if edo == nInicial:
-                R = entradas2ER(autom_tmp.__get_entradas(edo, edo))
-                expresiones.append(R + "*")
+                er = entradas2ER(autom_tmp.__get_entradas(edo, edo))
+                er.requiereClausulaKleene = True
             else:
                 R = entradas2ER(autom_tmp.__get_entradas(nInicial, nInicial))
                 S = entradas2ER(autom_tmp.__get_entradas(nInicial, edo))
                 U = entradas2ER(autom_tmp.__get_entradas(edo, edo))
                 T = entradas2ER(autom_tmp.__get_entradas(edo, nInicial))
-                er = ""
-                if R:
-                    er += R
-                SU = ""
-                if S:
-                    SU += S
                 if U:
-                    SU += U + "*"
-                SUT = SU
-                if T:
-                    SUT += T
+                    U.requiereClausulaKleene = True
+                SU = None
+                SUT = None
+                if S:
+                    SU = deepcopy(S)
+                    SU.concatenarTermino(U)
+                    if T:
+                        SUT = deepcopy(SU)
+                        SUT.concatenarTermino(T)
+                er = TerminoER(terminos=[R, SUT], reqKleene=True)
+                if 0 < len(er.terminos):
+                    er.concatenarTermino(SU)
                 else:
-                    SUT = ""
-                if R and SUT:
-                    er += "+"
-                er += SUT
-                if 0 < len(er):
-                    expresiones.append(f"({er})*{SU}")
-                else:
-                    expresiones.append(f"{SU}")
-        return "(" + (")+(".join(set(expresiones))) + ")"
+                    er = SU
+            expresiones.append(er)
+        return str(TerminoER(terminos=expresiones))
