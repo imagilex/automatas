@@ -10,6 +10,7 @@ from captcha.image import ImageCaptcha
 from hashlib import blake2b
 from os import remove, path
 
+
 def check_img_automata(automata, file):
     """
     Verifica si se ha generado el archivo correspondiente a un automata, en
@@ -32,6 +33,7 @@ def check_img_automata(automata, file):
     """
     if not isfile(f'static/img/{file}.png'):
         automata.save_png(f"static/img/{file}")
+
 
 def check_words(palabras, automatas) -> str:
     """
@@ -74,6 +76,7 @@ def check_words(palabras, automatas) -> str:
     return tabulate(
         resultados, headers=headers, tablefmt="html", showindex=True)
 
+
 def mk_test_word() -> str:
     """
     Crea una palabra semialeatoria orientada a pertenecer al lenguaje del
@@ -97,10 +100,11 @@ def mk_test_word() -> str:
         palabra += str(randint(0, 1000))
     return palabra
 
+
 def mk_test_lst(alfabeto, largo_palabra, vacio=set(), test_size=50) -> list:
     """
     Genera una lista de palabras, 75% de ellas son semialeatorias orientadas a
-    pertenecer al lenguaje del automata y el 25% de ellas son palabras 
+    pertenecer al lenguaje del automata y el 25% de ellas son palabras
     completamente aleatorias generadas usando un alfabeto determinado
 
     Parameters
@@ -110,7 +114,8 @@ def mk_test_lst(alfabeto, largo_palabra, vacio=set(), test_size=50) -> list:
     largo_palabra : int
         Longitud de las palabras a generar.
     vacio : set, optional
-        Conjunto de caracteres a usar como cadena vacia (epsilon). Default set().
+        Conjunto de caracteres a usar como cadena vacia (epsilon).
+        Default set().
     test_size : int, optional
         Total de palabras a generar en la lista. Default 50.
 
@@ -129,6 +134,7 @@ def mk_test_lst(alfabeto, largo_palabra, vacio=set(), test_size=50) -> list:
                 ])
                 for x in range(floor(test_size * 0.25))
            ]
+
 
 def create_captcha() -> str:
     """
@@ -150,6 +156,7 @@ def create_captcha() -> str:
     img = ImageCaptcha(280, 90)
     img.write(txt, f"static/captcha/{txtsha}.png")
     return txtsha
+
 
 def check_captcha(captcha, captcha_value) -> bool:
     """

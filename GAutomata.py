@@ -8,7 +8,7 @@
 __author__ = ["Jorge Alberto Chavez Alderete", "Ruben Ramirez Gomez"]
 __contact__ = [
     "213220158@upmh.edu.mx", "rgomez@upmh.edu.mx", "rramirez@rramirez.com",
-    "213220145@upmh.edu.mx", 
+    "213220145@upmh.edu.mx",
     ]
 __copyright__ = "(c) 2021"
 __license__ = "CC BY-NC-ND"
@@ -23,7 +23,7 @@ class GAutomata():
     """
     Representacion Grafica del automata
     """
-    
+
     __g = None
     __archivo = ""
 
