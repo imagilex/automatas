@@ -147,7 +147,6 @@ class TerminoER:
         Returns
         -------
         str
-            DESCRIPTION.
 
         """
         cadena = ""
@@ -255,7 +254,6 @@ class Automata():
                         'entradas': entradas
                         })
                     self.__alfabeto = self.__alfabeto.union(set(entradas))
-        self.__create_graph()
         
     def __create_graph(self) -> None:
         """
@@ -569,7 +567,6 @@ class Automata():
             vt
             for vt in self.vertices
             if vt['to'] not in nodosSinSalida]
-        self.__create_graph()
 
     @property
     def candidates2remove(self) -> set:
