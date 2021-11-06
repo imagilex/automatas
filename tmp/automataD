@@ -1,0 +1,33 @@
+digraph {
+	rankdir=LR
+	node [shape=doublecircle]
+	"{A, B, C, D}"
+	"{A, C}"
+	"{A, D}"
+	"{A, B, D}"
+	"{A, C, D}"
+	"{A, B, C}"
+	node [shape=circle]
+	node [shape=circle]
+	"{A}"
+	node [shape=plain]
+	inicio -> "{A}"
+	node [shape=circle]
+	node [shape=circle]
+	"{A}" -> "{A, B}" [label=1]
+	"{A}" -> "{A}" [label=0]
+	"{A, D}" -> "{A, B}" [label=1]
+	"{A, D}" -> "{A}" [label=0]
+	"{A, B}" -> "{A, B, C}" [label=1]
+	"{A, B}" -> "{A, C}" [label=0]
+	"{A, C}" -> "{A, B, D}" [label=1]
+	"{A, C}" -> "{A, D}" [label=0]
+	"{A, B, D}" -> "{A, B, C}" [label=1]
+	"{A, B, D}" -> "{A, C}" [label=0]
+	"{A, C, D}" -> "{A, B, D}" [label=1]
+	"{A, C, D}" -> "{A, D}" [label=0]
+	"{A, B, C}" -> "{A, B, C, D}" [label=1]
+	"{A, B, C}" -> "{A, C, D}" [label=0]
+	"{A, B, C, D}" -> "{A, B, C, D}" [label=1]
+	"{A, B, C, D}" -> "{A, C, D}" [label=0]
+}

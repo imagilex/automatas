@@ -1,8 +1,8 @@
 digraph {
 	rankdir=LR
 	node [shape=doublecircle]
-	C
 	D
+	C
 	node [shape=circle]
 	node [shape=circle]
 	A
