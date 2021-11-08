@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 """
 *** Universidad Politecnica Metropolitana de Hidalgo ***
 ***       Maestria en Inteligencia Artificial        ***
@@ -22,7 +23,6 @@ Caracter para palabra (caracter) vacio:
 """
 
 
-from __future__ import annotations
 import pandas as pd
 import numpy as np
 from itertools import chain, combinations

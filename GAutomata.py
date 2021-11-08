@@ -33,10 +33,10 @@ class GAutomata():
             self, titulo: Optional[str] = "",
             archivo: Optional[str] = 'automata',
             direccion: Optional[str] = "LR",
-            nodos_final: Optional[Iterable[str]] = None,
-            nodos_incial: Optional[Iterable[str]] = None,
-            nodos: Optional[Iterable[str]] = None,
-            vertices: Optional[Iterable[Iterable[str]]] = None):
+            nodos_final: Optional[Iterable] = None,
+            nodos_incial: Optional[Iterable] = None,
+            nodos: Optional[Iterable] = None,
+            vertices: Optional[Iterable] = None):
         """
         Clase para objetos que representan graficamente un automata
 
@@ -85,7 +85,7 @@ class GAutomata():
         if nodos is not None:
             self.agregar_nodos(nodos)
 
-    def agregar_finales(self, nodos: Iterable[str]):
+    def agregar_finales(self, nodos: Iterable):
         """
         Agregar nodos finales al grafico correspondiente al automata
 
@@ -120,7 +120,7 @@ class GAutomata():
         """
         self.agregar_finales([nodo])
 
-    def agregar_iniciales(self, nodos: Iterable[str]):
+    def agregar_iniciales(self, nodos: Iterable):
         """
         Agregar nodos iniciales al grafico correspondiente al automata
 
@@ -157,7 +157,7 @@ class GAutomata():
         """
         self.agregar_iniciales([nodo])
 
-    def agregar_nodos(self, nodos: Iterable[str]):
+    def agregar_nodos(self, nodos: Iterable):
         """
         Agregar nodos no inicial/final al grafico correspondiente al automata
 
@@ -191,7 +191,7 @@ class GAutomata():
         """
         self.agregar_nodos([nodo])
 
-    def agregar_vertices(self, vertices: Iterable[Iterable[str]]) -> None:
+    def agregar_vertices(self, vertices: Iterable) -> None:
         """
         Agrega vertices al grafico del automata
 
@@ -218,7 +218,7 @@ class GAutomata():
                 vertice[1],
                 label=(vertice[2] if len(vertice) == 3 else ""))
 
-    def agregar_vertice(self, vertice: Iterable[str]) -> None:
+    def agregar_vertice(self, vertice: Iterable) -> None:
         """
         Agrega un vertice al grafico del automata
 
