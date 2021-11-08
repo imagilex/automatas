@@ -1,6 +1,6 @@
 """
 Funciones necesarias para la ejecucion del automata en un entorno web
-(utilizando flask) para la implementacion de la UI 
+(utilizando flask) para la implementacion de la UI
 """
 
 from flask import Flask, render_template, request
@@ -9,11 +9,12 @@ import site_helpers as hp
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def index() -> str:
     """
     Renderizado de la pagina a mostrar en la url root ("/", index) sel sitio
-    
+
     Crea los automatas y valida una serie de palabras aleatorias.
 
     Returns
@@ -33,20 +34,19 @@ def index() -> str:
             {'AFN': automataAFN, 'AFD': automataAFD}),
         car_vacio=caracter_vacio, car_vacio_code=ord(caracter_vacio))
 
+
 @app.route('/test-word/', methods=["GET", "POST"])
 def test_word() -> str:
     """
     Renderizado de la pagina que permite al usuario validad sus propias
     palabras para con el automata
-    
+
     Crea los automatas, valida las palabras ingresadas por el usuario en caso
     de que existan
 
     Returns
     -------
     str
-        DESCRIPTION.
-
     """
     palabras = None
     resultados_pruebas = ""
@@ -69,7 +69,8 @@ def test_word() -> str:
         er_AFN=automataAFN.asRE, er_AFD=automataAFD.asRE,
         palabras=palabras, resultados_pruebas=resultados_pruebas,
         car_vacio=caracter_vacio, car_vacio_code=ord(caracter_vacio),
-        captcha = hp.create_captcha(), right_captcha=right_captcha)
+        captcha=hp.create_captcha(), right_captcha=right_captcha)
+
 
 if "__main__" == __name__:
     app.run()

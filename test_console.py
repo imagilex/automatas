@@ -9,7 +9,7 @@
 __author__ = ["Jorge Alberto Chavez Alderete", "Ruben Ramirez Gomez"]
 __contact__ = [
     "213220158@upmh.edu.mx", "rgomez@upmh.edu.mx", "rramirez@rramirez.com",
-    "213220145@upmh.edu.mx", 
+    "213220145@upmh.edu.mx",
     ]
 __copyright__ = "(c) 2021"
 __license__ = "CC BY-NC-ND"
@@ -39,8 +39,6 @@ palabras = [
 palabras += [
     '0.241565+6',
     '.-97656.6.',
-    
-    
     '1.-+3..9-6',
     '2358-44-.4',
     '.--+-00976',
