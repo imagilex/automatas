@@ -22,17 +22,20 @@ Caracter para palabra (caracter) vacio:
 """
 
 
+from __future__ import annotations
 import pandas as pd
 import numpy as np
 from itertools import chain, combinations
 from GAutomata import GAutomata
 from copy import deepcopy
+from typing import Optional, Union
+from collections import Iterable
 
 
 caracter_vacio = chr(198)
 
 
-def conjuntoPotencia(array) -> list:
+def conjuntoPotencia(array: Iterable[str]) -> list:
     """
     Calcula del conjunto potencia de un conjunto de elementos
 
@@ -54,7 +57,7 @@ def conjuntoPotencia(array) -> list:
                 combinations(s, r) for r in range(len(s) + 1))]
 
 
-def set2Str(conjunto) -> str:
+def set2Str(conjunto: set) -> str:
     """
     Convierte un conjunto a su representacion como cadena de texto
 
@@ -75,7 +78,7 @@ def set2Str(conjunto) -> str:
                 ']', '}')
 
 
-def entradas2ER(entradas) -> str:
+def entradas2ER(entradas: Iterable) -> str:
     """
     Convierte un conjunto de elementos a su representacion como
     expresion regular simple, p.e.:
@@ -104,7 +107,10 @@ class TerminoER:
     Representacion de un termino de una expresion regular
     """
 
-    def __init__(self, siguienteTermino=None, terminos=None, reqKleene=False):
+    def __init__(
+            self, siguienteTermino: Optional[TerminoER] = None,
+            terminos: Optional[Iterable] = None,
+            reqKleene: Optional[bool] = False):
         """
         Representacion de un termino de una expresion regular
 
@@ -131,7 +137,7 @@ class TerminoER:
         for term in terminos:
             self.unirTermino(term)
 
-    def unirTermino(self, termino) -> None:
+    def unirTermino(self, termino: Union[str, TerminoER]) -> None:
         """
         Agrega un termino para UNION
 
@@ -170,13 +176,13 @@ class TerminoER:
             else:
                 self.terminos.append(termino)
 
-    def concatenarTermino(self, termino) -> None:
+    def concatenarTermino(self, termino: 'TerminoER') -> None:
         """
         Agrega un termino para CONCATENAR
 
         Parameters
         ----------
-        termino : str or TemrinoER
+        termino : TerminoER
             Termino a concatenar.
 
         Returns
@@ -223,8 +229,11 @@ class Automata():
     __spliter_entradas = ","
 
     def __init__(
-            self, iniciales=[], finales=[], archivo_matriz="",
-            spliter_entradas=",", just_struct=False):
+            self, iniciales: Optional[Iterable[str]] = [],
+            finales: Optional[Iterable[str]] = [],
+            archivo_matriz: Optional[str] = "",
+            spliter_entradas: Optional[str] = ",",
+            just_struct: Optional[bool] = False):
         """
         Representacion de un automata, el cual puede ser o no determinista
 
@@ -392,7 +401,7 @@ class Automata():
         """
         return set(self.__alfabeto)
 
-    def save_png(self, filename) -> None:
+    def save_png(self, filename: str) -> None:
         """
         Almacena la representacion grafica del automata en un archivo *.png
 
@@ -410,7 +419,7 @@ class Automata():
         if self.__grafo:
             self.__grafo.guardar(filename)
 
-    def transicion(self, estado, entrada) -> set:
+    def transicion(self, estado: str, entrada: str) -> set:
         """
         Funcion de transicion.
 
@@ -444,7 +453,9 @@ class Automata():
             self.vertices)
         return set([vertice['to'] for vertice in vertices])
 
-    def transicion_extendida(self, palabra, inicio=None) -> set:
+    def transicion_extendida(
+            self, palabra: str,
+            inicio: Optional[Iterable[str]] = None) -> set:
         """
         Funcion de transicion extendida
 
@@ -495,7 +506,7 @@ class Automata():
             return {}
         return edos_paso.union(self.__estado_paso_vacio(edos_paso))
 
-    def __estado_paso_vacio(self, estados) -> set:
+    def __estado_paso_vacio(self, estados: Iterable) -> set:
         """
         Devuelve los nodos adyacentes correspondientes a estados a donde se
         puede transferir con entradas de cadena vacia
@@ -518,7 +529,7 @@ class Automata():
                 if vt['from'] == edo and caracter_vacio in vt['entradas']]))
         return edos
 
-    def verificar_palabra(self, palabra) -> bool:
+    def verificar_palabra(self, palabra: str) -> bool:
         """
         Verifica si una palabra pertenece o no al lenguaje generado por
         el automata
@@ -681,7 +692,7 @@ class Automata():
         """
         return caracter_vacio in self.alfabeto
 
-    def __get_entradas(self, nodo_from, nodo_to) -> list:
+    def __get_entradas(self, nodo_from: str, nodo_to: str) -> list:
         """
         (De uso interno). Obtiene las diferentes entradas de un nodo a otro,
         las simplifica en caso de que existan multiples vertices

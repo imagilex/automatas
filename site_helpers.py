@@ -9,9 +9,12 @@ from math import ceil, floor
 from captcha.image import ImageCaptcha
 from hashlib import blake2b
 from os import remove, path
+from collections import Iterable
+from typing import Optional
+from Automata import Automata
 
 
-def check_img_automata(automata, file):
+def check_img_automata(automata: Automata, file: str):
     """
     Verifica si se ha generado el archivo correspondiente a un automata, en
     caso de que no sea asi crea un archivo *.png con la representacion visual
@@ -35,7 +38,7 @@ def check_img_automata(automata, file):
         automata.save_png(f"static/img/{file}")
 
 
-def check_words(palabras, automatas) -> str:
+def check_words(palabras: Iterable[str], automatas: Iterable[Automata]) -> str:
     """
     Verifica, para cada palabra en la lista de palabras, si pertenecen al
     lenguaje generado por los automatas
@@ -101,7 +104,9 @@ def mk_test_word() -> str:
     return palabra
 
 
-def mk_test_lst(alfabeto, largo_palabra, vacio=set(), test_size=50) -> list:
+def mk_test_lst(
+        alfabeto: set, largo_palabra: int, vacio: Optional[set] = set(),
+        test_size: Optional[int] = 50) -> list:
     """
     Genera una lista de palabras, 75% de ellas son semialeatorias orientadas a
     pertenecer al lenguaje del automata y el 25% de ellas son palabras
@@ -158,7 +163,7 @@ def create_captcha() -> str:
     return txtsha
 
 
-def check_captcha(captcha, captcha_value) -> bool:
+def check_captcha(captcha: str, captcha_value: str) -> bool:
     """
     Valida el captcha enviado al usuario contra el ingresado por el usuario
     y elimina la imgane png correspondiente a ese captcha
