@@ -832,7 +832,7 @@ class Automata():
                         data[v]['distancia'] = data[u]['distancia'] + 1
                         data[v]['padre'] = u
                         cola += [tuple([v, data[v]['distancia']]), ]
-        return data[list(self.estados_finales)[0]]['distancia']
+        return min([data[n]['distancia'] for n in self.estados_finales])
 
     @property
     def asRE(self) -> str:
