@@ -38,7 +38,7 @@ def check_img_automata(automata: Automata, file: str):
         automata.save_png(f"static/img/{file}")
 
 
-def check_words(palabras: Iterable[str], automatas: Iterable[Automata]) -> str:
+def check_words(palabras: Iterable, automatas: Iterable) -> str:
     """
     Verifica, para cada palabra en la lista de palabras, si pertenecen al
     lenguaje generado por los automatas
