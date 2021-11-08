@@ -730,9 +730,7 @@ class Automata():
         """
         edos2reduce = self.estados.difference(
             self.estados_iniciales.union(self.estados_finales))
-        print(edos2reduce)
         edos2reduce = sorted(edos2reduce, key=self.__node_complexity)
-        print(edos2reduce)
         for edo in edos2reduce:
             nodos_ant = set([
                 vt['from']
@@ -800,7 +798,6 @@ class Automata():
             if vt['to'] == nodo and vt['to'] != vt['from']])
         res = f"{toQty + fromQty:04}_{self.__dijkstra(nodo):04}_{nodo}"
         # res = f"{self.__dijkstra(nodo):04}_{toQty + fromQty:04}_{nodo}"
-        print(res)
         return res
     
     def __dijkstra(self, origen: str) -> int:
