@@ -730,6 +730,9 @@ class Automata():
         """
         edos2reduce = self.estados.difference(
             self.estados_iniciales.union(self.estados_finales))
+        print(edos2reduce)
+        edos2reduce = sorted(edos2reduce, key=self.__node_complexity)
+        print(edos2reduce)
         for edo in edos2reduce:
             nodos_ant = set([
                 vt['from']
@@ -772,6 +775,67 @@ class Automata():
                 vt
                 for vt in self.vertices
                 if vt['from'] != edo and vt['to'] != edo]
+
+    def __node_complexity(self, nodo: str) -> str:
+        """
+        (De uso interno). Calcula la complejidad de un nodo para reducirlo
+
+        Parameters
+        ----------
+        nodo : str
+            nodo a reducir.
+
+        Returns
+        -------
+        str
+
+        """
+        toQty = len([
+            vt
+            for vt in self.vertices
+            if vt['from'] == nodo and vt['to'] != vt['from']])
+        fromQty = len([
+            vt
+            for vt in self.vertices
+            if vt['to'] == nodo and vt['to'] != vt['from']])
+        res = f"{toQty + fromQty:04}_{self.__dijkstra(nodo):04}_{nodo}"
+        # res = f"{self.__dijkstra(nodo):04}_{toQty + fromQty:04}_{nodo}"
+        print(res)
+        return res
+    
+    def __dijkstra(self, origen: str) -> int:
+        """
+        (De uso interno). Implementacion de Dijkstra para calcular distancia
+        de un nodo al nodo de aceptacion. Se mide la distancia en unidades de
+        paso
+
+        Parameters
+        ----------
+        origen : str
+            Nodo Origen.
+
+        Returns
+        -------
+        int.
+
+        """
+        data = dict()
+        for nodo in self.estados:
+            data[nodo] = {
+                'distancia': float('inf'), 'padre': None, 'visto': False}
+        data[origen]['distancia'] = 0
+        cola = [tuple([origen, data[origen]['distancia']]), ]
+        while 0 < len(cola):
+            u = sorted(cola, key=lambda tupla: tupla[1])[0][0]
+            cola.remove(tuple([u, data[u]['distancia']]))
+            data[u]['visto'] = True
+            for v in [vt['to'] for vt in self.vertices if vt['from'] == u]:
+                if not data[v]['visto']:
+                    if data[v]['distancia'] > data[u]['distancia'] + 1:
+                        data[v]['distancia'] = data[u]['distancia'] + 1
+                        data[v]['padre'] = u
+                        cola += [tuple([v, data[v]['distancia']]), ]
+        return data[list(self.estados_finales)[0]]['distancia']
 
     @property
     def asRE(self) -> str:
