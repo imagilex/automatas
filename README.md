@@ -1,6 +1,6 @@
 # Autómatas y Lenguaje Natural
 
-============================================
+***
 
 Ejecución local con flask:
 
@@ -18,7 +18,7 @@ set FLASK_APP=app.py
 python -m flask run
 ~~~
 
-============================================
+***
 
 A partir de la clase Automata es posible:
 
@@ -30,7 +30,7 @@ A partir de la clase Automata es posible:
 - Transformación de AFN a AFD
 - Obtención de Expresión Regular
 
-============================================
+***
 
 Implementado en: https://mia.imagilex.com.mx/automata-decimales
 
