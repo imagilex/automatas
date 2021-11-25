@@ -1,5 +1,7 @@
 # Autómatas y Lenguaje Natural
 
+============================================
+
 Ejecución local con flask:
 
 Ubuntu
@@ -16,6 +18,8 @@ set FLASK_APP=app.py
 python -m flask run
 ~~~
 
+============================================
+
 A partir de la clase Automata es posible:
 
 - Generar el automata gráficamente y guarda el *.png
@@ -25,6 +29,8 @@ A partir de la clase Automata es posible:
 - Realizar verificación de palabras
 - Transformación de AFN a AFD
 - Obtención de Expresión Regular
+
+============================================
 
 Implementado en: https://mia.imagilex.com.mx/automata-decimales
 
