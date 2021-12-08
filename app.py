@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, send_from_directory, url_for,
 from Automata import Automata, caracter_vacio
 import site_helpers as hp
 from werkzeug.utils import secure_filename
+from random import randint
 import os
 
 
@@ -20,7 +21,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
            
-@app.route('/')
+@app.route('/automata-0/')
 def index() -> str:
     """
     Renderizado de la pagina a mostrar en la url root ("/", index) sel sitio
@@ -81,7 +82,7 @@ def test_word() -> str:
         car_vacio=caracter_vacio, car_vacio_code=ord(caracter_vacio),
         captcha=hp.create_captcha(), right_captcha=right_captcha)
 
-@app.route('/upload_automata/', methods=['POST', 'GET'])
+@app.route('/', methods=['POST', 'GET'])
 def upload_automata():
     if request.method == 'POST':
         estados = request.form['estados']
@@ -102,13 +103,17 @@ def test_automata():
     estado_final = 'q'+estados
     automataAFN_test= Automata(['q0'], [estado_final],'data/matriz_nueva.csv')
     automataAFD_test = automataAFN_test.AFN2AFD
-    hp.check_img_automata(automataAFN_test, 'test_AFN')
-    hp.check_img_automata(automataAFD_test, 'test_AFD')
+    rndnum = randint(1,100000)
+    imgAFN = f"img/autom_{rndnum}_AFN"
+    imgAFD = f"img/autom_{rndnum}_AFD"
+    automataAFN_test.save_png(f"static/{imgAFN}")
+    automataAFD_test.save_png(f"static/{imgAFD}")
     return render_template(
         "test_automata.html",
         er_AFN=automataAFN_test.asRE, er_AFD=automataAFD_test.asRE,
+        imgAFD=imgAFD + ".png", imgAFN=imgAFN + ".png",
         resultados_pruebas_test=hp.check_words(
-            hp.mk_test_lst(automataAFN_test.alfabeto,10, caracter_vacio),
+            hp.mk_test_lst2(automataAFN_test.alfabeto,len(automataAFN_test.estados), 2**len(automataAFN_test.estados), caracter_vacio),
             {'AFN': automataAFN_test, 'AFD': automataAFD_test}),
         car_vacio=caracter_vacio, car_vacio_code=ord(caracter_vacio))
 
@@ -118,4 +123,4 @@ def uploaded_file(filename):
         as_attachment=True,attachment_filename='matriz.csv')
 
 if "__main__" == __name__:
-    app.run(debug="true")
+    app.run()

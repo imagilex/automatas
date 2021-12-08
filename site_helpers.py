@@ -141,6 +141,43 @@ def mk_test_lst(
            ]
 
 
+def mk_test_lst2(
+        alfabeto: set, largo_palabra_min: int, largo_palabra_max: int,
+        vacio: Optional[set] = set(), test_size: Optional[int] = 100) -> list:
+    """
+    Genera una lista de palabras, 75% de ellas son semialeatorias orientadas a
+    pertenecer al lenguaje del automata y el 25% de ellas son palabras
+    completamente aleatorias generadas usando un alfabeto determinado
+
+    Parameters
+    ----------
+    alfabeto : set
+        Alfabeto sobre el cual se generaran las palabras aleatorias.
+    largo_palabra_min : int
+        Longitud de las palabras a generar.
+    largo_palabra_max : int
+        Longitud de las palabras a generar.
+    vacio : set, optional
+        Conjunto de caracteres a usar como cadena vacia (epsilon).
+        Default set().
+    test_size : int, optional
+        Total de palabras a generar en la lista. Default 50.
+
+    Returns
+    -------
+    list.
+
+    """
+    return [
+                "".join([
+                    choice(list(alfabeto.difference(vacio)))
+                    for x in range(
+                        randint(largo_palabra_min, largo_palabra_max))
+                ])
+                for x in range(test_size)
+           ]
+
+
 def create_captcha() -> str:
     """
     Generador de imagen captcha para impedir que robots web hagan trabajar
