@@ -132,3 +132,4 @@ dmypy.json
 tmp/
 static/captcha/
 static/img/
+data/matriz_nueva.csv
