@@ -18,7 +18,7 @@ __version__ = 1.0
 
 import graphviz
 from typing import Optional
-from collections import Iterable
+from typing import Iterable
 
 
 class GAutomata():

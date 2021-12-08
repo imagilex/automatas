@@ -29,7 +29,7 @@ from itertools import chain, combinations
 from GAutomata import GAutomata
 from copy import deepcopy
 from typing import Optional, Union
-from collections import Iterable
+from typing import Iterable
 
 
 caracter_vacio = chr(198)

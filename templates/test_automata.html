@@ -2,9 +2,9 @@
 
 {% block content %}
 
-    <p class="h3">Automata a revisar AFN:</p>
+    <p class="h3">Automata cargado AFN:</p>
 
-    <img src="{{ url_for("static", filename="img/automata_decimales_AFN.png") }}" class="img-fluid rounded mx-auto d-block"/>
+    
     <div class="row">
         <div class="col-sm-6">
             Expresion Regular Autogenerada
@@ -20,7 +20,7 @@
 
     <p class="h3">AFD equivalente:</p>
 
-    <img src="{{ url_for("static", filename="img/automata_decimales_AFD.png") }}" class="img-fluid rounded mx-auto d-block"/>
+    
     <div class="row">
         <div class="col-sm-6">
             Expresion Regular Autogenerada
@@ -37,7 +37,7 @@
     <p class="h3">Pruebas de testeo<a href="#Nota-3"><sup>[3]</sup></a>:</p>
 
     <div id="div_resultados_pruebas">
-        {{ resultados_pruebas|safe }}
+        {{ resultados_pruebas_test|safe }}
     </div>
 
     <p class="h5">Notas</p>
@@ -51,7 +51,7 @@
         <strong>[3]:</strong> Las pruebas se han generado de manera aleatoria, por ello son diferentes en cada revision de esta pagina web
     </div>
 
-    <script type="text/javascript">
+     <script type="text/javascript">
     $(document).ready(() => {
         let tbl_res = $("#div_resultados_pruebas table");
         tbl_res.addClass("table");

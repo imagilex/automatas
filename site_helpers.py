@@ -9,7 +9,7 @@ from math import ceil, floor
 from captcha.image import ImageCaptcha
 from hashlib import blake2b
 from os import remove, path
-from collections import Iterable
+from typing import Iterable
 from typing import Optional
 from Automata import Automata
 

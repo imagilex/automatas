@@ -130,3 +130,5 @@ dmypy.json
 
 # Archivos de prueba consola
 tmp/
+static/captcha/
+static/img/
