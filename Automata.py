@@ -117,11 +117,11 @@ class TerminoER:
         Parameters
         ----------
         siguienteTermino : TerminoER, optional
-            Termino para concatenar al Termino que se creará. Default None.
+            Termino para concatenar al Termino que se creara. Default None.
         terminos : array like, optional
             Terminos para unir. Nefault None.
         reqKleene : bool, optional
-            Indiqca si este término requiere o no * (clausula de Kleene).
+            Indiqca si este termino requiere o no * (clausula de Kleene).
             Default False.
 
         Returns
