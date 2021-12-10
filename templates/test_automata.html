@@ -4,7 +4,8 @@
 
     <p class="h3">Automata cargado AFN:</p>
 
-    <img src="{{ url_for("static", filename=imgAFN) }}" class="img-fluid rounded mx-auto d-block"/>
+    <img id="imgAFN" src="{{ url_for("static", filename=imgAFN) }}" class="img-fluid rounded mx-auto d-block"/>
+    <div id="divImgAFN" class="mx-auto d-block"></div>
     
     <div class="row">
         <div class="col-sm-6">
@@ -21,7 +22,8 @@
 
     <p class="h3">AFD equivalente:</p>
 
-    <img src="{{ url_for("static", filename=imgAFD) }}" class="img-fluid rounded mx-auto d-block"/>
+    <img id="imgAFD" src="{{ url_for("static", filename=imgAFD) }}" class="img-fluid rounded mx-auto d-block"/>
+    <div id="divImgAFD" class="mx-auto d-block"></div>
 
     <div class="row">
         <div class="col-sm-6">
@@ -53,7 +55,9 @@
         <strong>[3]:</strong> Las pruebas se han generado de manera aleatoria, por ello son diferentes en cada revision de esta pagina web
     </div>
 
-     <script type="text/javascript">
+    <script src="{{ url_for("static", filename='viz/viz.js') }}"></script>
+    <script src="{{ url_for("static", filename='viz/full.render.js') }}"></script>
+    <script type="text/javascript">
     $(document).ready(() => {
         let tbl_res = $("#div_resultados_pruebas table");
         tbl_res.addClass("table");
@@ -64,6 +68,31 @@
         tbl_res.find("td, th").each((idx, celda) => {
            $(celda).addClass("text-center")
         });
+
+        {% if imgAFN_content %}
+            $("#imgAFN").remove();
+            var digAFN = `{{ imgAFN_content | safe }}`;
+            var viz = new Viz();
+            viz.renderSVGElement(digAFN).then(function(element) {
+                $("#divImgAFN").append(element);
+            }).catch(error => {
+                viz = new Viz();
+                console.error(error);
+            });
+        {% endif %}
+
+        {% if imgAFD_content %}
+            $("#imgAFD").remove();
+            var digAFD = `{{ imgAFD_content | safe }}`;
+            var viz = new Viz();
+            viz.renderSVGElement(digAFD).then(function(element) {
+                $("#divImgAFD").append(element);
+            }).catch(error => {
+                viz = new Viz();
+                console.error(error);
+            });
+        {% endif %}
+
     });
     </script>
 

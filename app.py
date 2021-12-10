@@ -92,26 +92,42 @@ def upload_automata():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('test_automata', estados=estados))
         else:
-            mensaje= "Extensión de archivo no valida"
+            mensaje= "Extension de archivo no valida"
             return render_template("upload_automata.html", mensaje=mensaje)
     else:
         return render_template("upload_automata.html", mensaje="")
 
-@app.route('/test_automata/', methods=['POST', 'GET'])
+@app.route('/test-automata/', methods=['POST', 'GET'])
 def test_automata():
     estados = request.args['estados']
     estado_final = 'q'+estados
-    automataAFN_test= Automata(['q0'], [estado_final],'data/matriz_nueva.csv')
+    try:        
+        automataAFN_test= Automata(['q0'], [estado_final],'data/matriz_nueva.csv')
+    except ValueError as e:
+        return render_template(
+            "upload_automata.html",
+            mensaje="El numero de estados no coincide con el seleccionado." + str(e))
     automataAFD_test = automataAFN_test.AFN2AFD
     rndnum = randint(1,100000)
     imgAFN = f"img/autom_{rndnum}_AFN"
     imgAFD = f"img/autom_{rndnum}_AFD"
-    automataAFN_test.save_png(f"static/{imgAFN}")
-    automataAFD_test.save_png(f"static/{imgAFD}")
+    imgAFN_content = False
+    imgAFD_content = False
+    try:
+        automataAFN_test.save_png(f"static/{imgAFN}")
+    except:
+        with open(f"static/{imgAFN}", "r") as f:
+            imgAFN_content = "".join(f.readlines())
+    try:
+        automataAFD_test.save_png(f"static/{imgAFD}")
+    except:
+        with open(f"static/{imgAFD}", "r") as f:
+            imgAFD_content = "".join(f.readlines())
     return render_template(
         "test_automata.html",
         er_AFN=automataAFN_test.asRE, er_AFD=automataAFD_test.asRE,
         imgAFD=imgAFD + ".png", imgAFN=imgAFN + ".png",
+        imgAFN_content=imgAFN_content, imgAFD_content=imgAFD_content,
         resultados_pruebas_test=hp.check_words(
             hp.mk_test_lst2(automataAFN_test.alfabeto,len(automataAFN_test.estados), 2**len(automataAFN_test.estados), caracter_vacio),
             {'AFN': automataAFN_test, 'AFD': automataAFD_test}),
