@@ -128,4 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-/static/captcha
+# Archivos de prueba consola
+tmp/
+static/captcha/
+static/img/
+data/matriz_nueva.csv

@@ -14,7 +14,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Automata Decimales</title>
+    <title>Proyecto Final Automatas</title>
     <link rel="icon" href="{{ url_for("static", filename="logos/st_1.png") }}" type="image/png" />
     <link rel="stylesheet" href="{{ url_for("static", filename="basic.css") }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -22,27 +22,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
 </head>
-<body class="bg-dark text-light">
-    <nav class="navbar navbar-dark bg-dark navbar-expand-md">
-        <div class="container-fluid">
+<body class="bg-light text-dark">
+    <div class="container">
+    <nav class="navbar navbar-dark  navbar-expand-md" style="background-color: #71499C;">
+        <div class="container-fluid ">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <img src="{{ url_for("static", filename="logos/st_4.png") }}" height="35" class="d-inline-block align-text-top">
+                <img src="{{ url_for("static", filename="logos/st_1.png") }}" height="35" class="d-inline-block align-text-top">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">Inicio</a>
+                    <!--<li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Automata 0</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('test_word') }}">Prueba tu Cadena</a>
+                    </li>-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('upload_automata') }}">Inicio</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
+    </div>
 
     <div class="container">
         {% block content %}
@@ -50,10 +55,14 @@
     </div>
 
     <footer class="text-center">
-        <div>&copy; 2021 | Todos los derechos reservados | UMPH - MIA | Automatas y Lenguaje Natural</div>
+        <div>&copy; Diciembre 2021 | Todos los derechos reservados | UMPH - MIA | Automatas y Lenguaje Natural</div>
         <div>
             <a href="mailto:213220145@upmh.edu.mx">Jorge Alberto Chavez Alderete</a> |
-            <a href="mailto:213220158@upmh.edu.mx">Ruben Ramirez Gomez</a></div>
+            <a href="mailto:213220158@upmh.edu.mx">Ruben Ramirez Gomez</a> |
+            <a href="mailto:213220002@upmh.edu.mx">Ruth Abigail Mu&ntilde;oz Escarcega</a> |
+            <a href="mailto:213220001@upmh.edu.mx">Samuel Mendez Vega</a> |
+            <a href="mailto:213220149@upmh.edu.mx">Raymundo Coronado Mendoza</a>
+        </div>
     </footer>
 </body>
 </html>

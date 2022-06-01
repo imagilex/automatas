@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 """
 *** Universidad Politecnica Metropolitana de Hidalgo ***
 ***       Maestria en Inteligencia Artificial        ***
@@ -8,7 +9,7 @@
 __author__ = ["Jorge Alberto Chavez Alderete", "Ruben Ramirez Gomez"]
 __contact__ = [
     "213220158@upmh.edu.mx", "rgomez@upmh.edu.mx", "rramirez@rramirez.com",
-    "213220145@upmh.edu.mx", 
+    "213220145@upmh.edu.mx",
     ]
 __copyright__ = "(c) 2021"
 __license__ = "CC BY-NC-ND"
@@ -23,15 +24,18 @@ Caracter para palabra (caracter) vacio:
 
 
 import pandas as pd
+import numpy as np
 from itertools import chain, combinations
 from GAutomata import GAutomata
 from copy import deepcopy
+from typing import Optional, Union
+from typing import Iterable
 
 
 caracter_vacio = chr(198)
 
 
-def conjuntoPotencia(array) -> list:
+def conjuntoPotencia(array: Iterable[str]) -> list:
     """
     Calcula del conjunto potencia de un conjunto de elementos
 
@@ -48,12 +52,12 @@ def conjuntoPotencia(array) -> list:
     """
     s = list(array)
     return [
-        set(tupla) 
+        set(tupla)
         for tupla in chain.from_iterable(
-                combinations(s, r) for r in range(len(s)+1))]
+                combinations(s, r) for r in range(len(s) + 1))]
 
 
-def set2Str(conjunto) -> str:
+def set2Str(conjunto: set) -> str:
     """
     Convierte un conjunto a su representacion como cadena de texto
 
@@ -69,14 +73,14 @@ def set2Str(conjunto) -> str:
 
     """
     return f"{sorted(conjunto)}".replace(
-        "'","").replace(
-            '[','{').replace(
-                ']','}')
-                
-                
-def entradas2ER(entradas) -> str:
+        "'", "").replace(
+            '[', '{').replace(
+                ']', '}')
+
+
+def entradas2ER(entradas: Iterable) -> str:
     """
-    Convierte un conjunto de elementos a su representacion como 
+    Convierte un conjunto de elementos a su representacion como
     expresion regular simple, p.e.:
         [] => '' (Cadena vacia)
         [0] => '0'
@@ -93,11 +97,123 @@ def entradas2ER(entradas) -> str:
         Representacion como er simple del conjunto de elementos.
 
     """
-    if 0 == len(entradas):
-        return ""
-    elif 1 == len(entradas):
+    if 1 == len(entradas) and isinstance(entradas[0], TerminoER):
         return entradas[0]
-    return "(" + ("+".join(sorted(set(entradas)))) + ")"
+    return None if 0 == len(entradas) else TerminoER(terminos=entradas)
+
+
+class TerminoER:
+    """
+    Representacion de un termino de una expresion regular
+    """
+
+    def __init__(
+            self, siguienteTermino: Optional[TerminoER] = None,
+            terminos: Optional[Iterable] = None,
+            reqKleene: Optional[bool] = False):
+        """
+        Representacion de un termino de una expresion regular
+
+        Parameters
+        ----------
+        siguienteTermino : TerminoER, optional
+            Termino para concatenar al Termino que se creara. Default None.
+        terminos : array like, optional
+            Terminos para unir. Nefault None.
+        reqKleene : bool, optional
+            Indiqca si este termino requiere o no * (clausula de Kleene).
+            Default False.
+
+        Returns
+        -------
+        None.
+
+        """
+        # Termino siguiente a concatenar
+        self.nextTermino = siguienteTermino
+        self.requiereClausulaKleene = reqKleene
+        # Terminos a unir
+        self.terminos = list()
+        for term in terminos:
+            self.unirTermino(term)
+
+    def unirTermino(self, termino: Union[str, TerminoER]) -> None:
+        """
+        Agrega un termino para UNION
+
+        Parameters
+        ----------
+        termino : str or TemrinoER
+            Termino a UNIR.
+
+        Returns
+        -------
+        None
+
+        """
+        if termino and termino not in self.terminos:
+            if isinstance(termino, TerminoER):
+                new_terms = list()
+                aniadido = False
+                for term in self.terminos:
+                    if isinstance(term, TerminoER):
+                        if (termino.terminos == term.terminos and
+                                termino.requiereClausulaKleene ==
+                                term.requiereClausulaKleene):
+                            t1 = TerminoER(
+                                terminos=termino.terminos,
+                                reqKleene=termino.requiereClausulaKleene)
+                            t2 = TerminoER(terminos=[
+                                term.nextTermino, termino.nextTermino])
+                            t1.concatenarTermino(t2)
+                            new_terms.append(t1)
+                            aniadido = True
+                            continue
+                    new_terms.append(term)
+                if not aniadido:
+                    new_terms.append(termino)
+                self.terminos = new_terms
+            else:
+                self.terminos.append(termino)
+
+    def concatenarTermino(self, termino: 'TerminoER') -> None:
+        """
+        Agrega un termino para CONCATENAR
+
+        Parameters
+        ----------
+        termino : TerminoER
+            Termino a concatenar.
+
+        Returns
+        -------
+        None
+
+        """
+        current = self
+        while current.nextTermino:
+            current = current.nextTermino
+        current.nextTermino = termino
+
+    def __str__(self) -> str:
+        """
+        Conversion a cadena de texto
+
+        Returns
+        -------
+        str
+
+        """
+        cadena = ""
+        if 1 == len(self.terminos):
+            cadena = str(self.terminos[0])
+        elif 1 < len(self.terminos):
+            cadena = f"({'+'.join(sorted([str(t) for t in self.terminos]))})"
+        if self.requiereClausulaKleene:
+            cadena += "*"
+        if self.nextTermino:
+            cadena += str(self.nextTermino)
+        return cadena
 
 
 class Automata():
@@ -111,10 +227,13 @@ class Automata():
     __alfabeto = set()
     __grafo = None
     __spliter_entradas = ","
-    
+
     def __init__(
-            self, iniciales=[], finales=[], archivo_matriz="", 
-            spliter_entradas=",", just_struct=False):
+            self, iniciales: Optional[Iterable[str]] = [],
+            finales: Optional[Iterable[str]] = [],
+            archivo_matriz: Optional[str] = "",
+            spliter_entradas: Optional[str] = ",",
+            just_struct: Optional[bool] = False):
         """
         Representacion de un automata, el cual puede ser o no determinista
 
@@ -128,7 +247,7 @@ class Automata():
             Ruta al archivo csv con la matriz de adyacencia que representa al
             automata. Default "".
         spliter_entradas : str, optional
-            Divisor de elementos de entrada en la matriz de adyacencia. 
+            Divisor de elementos de entrada en la matriz de adyacencia.
             Default ",".
         just_struct : Boolean, optional
             Indica si unicamente se generara la estructura del objeto.
@@ -171,7 +290,7 @@ class Automata():
                 raise ValueError(
                     f"La columna {col} no se encuentra en las filas")
         for nodo in self.__iniciales.union(self.__finales):
-            if not nodo in dfTmp.columns:
+            if nodo not in dfTmp.columns:
                 raise ValueError(
                     f"El nodo {nodo} no se encuentra en la matriz")
         self.__spliter_entradas = spliter_entradas
@@ -182,7 +301,7 @@ class Automata():
                     label = dfTmp.loc[idx][col]
                     label = str(
                         int(label)
-                        if 'float64' == type(label).__name__
+                        if isinstance(label, np.float64)
                         else label)
                     entradas = [
                         entrada.strip()
@@ -193,8 +312,7 @@ class Automata():
                         'entradas': entradas
                         })
                     self.__alfabeto = self.__alfabeto.union(set(entradas))
-        self.__create_graph()
-        
+
     def __create_graph(self) -> None:
         """
         (De uso interno). Genera la represtacion grafica del automata
@@ -212,7 +330,8 @@ class Automata():
                 (
                     vertice['from'],
                     vertice['to'],
-                    self.__spliter_entradas.join(sorted(vertice['entradas']))
+                    self.__spliter_entradas.join(sorted([
+                        str(e) for e in vertice['entradas']]))
                 ) for vertice in self.vertices])
 
     @property
@@ -282,7 +401,7 @@ class Automata():
         """
         return set(self.__alfabeto)
 
-    def save_png(self, filename) -> None:
+    def save_png(self, filename: str) -> None:
         """
         Almacena la representacion grafica del automata en un archivo *.png
 
@@ -296,10 +415,11 @@ class Automata():
         None.
 
         """
+        self.__create_graph()
         if self.__grafo:
             self.__grafo.guardar(filename)
 
-    def transicion(self, estado, entrada) -> set:
+    def transicion(self, estado: str, entrada: str) -> set:
         """
         Funcion de transicion.
 
@@ -321,19 +441,21 @@ class Automata():
         -------
         set
             Conjunto de estados a los cuales se transfiere desde el estado
-            utlizando la entrada, en caso de no haber estados a transferir 
+            utlizando la entrada, en caso de no haber estados a transferir
             el conjunto sera vacio sde estados resultado sera vacio.
         """
-        if not estado in self.estados:
+        if estado not in self.estados:
             raise ValueError(f"El estado {estado} no se encuentra")
-        if not entrada in self.alfabeto:
+        if entrada not in self.alfabeto:
             raise ValueError(f"La entrada {entrada} no se encuentra")
         vertices = filter(
-            lambda edo: edo['from']==estado and entrada in edo['entradas'],
+            lambda edo: edo['from'] == estado and entrada in edo['entradas'],
             self.vertices)
         return set([vertice['to'] for vertice in vertices])
-    
-    def transicion_extendida(self, palabra, inicio=None) -> set:
+
+    def transicion_extendida(
+            self, palabra: str,
+            inicio: Optional[Iterable[str]] = None) -> set:
         """
         Funcion de transicion extendida
 
@@ -342,7 +464,7 @@ class Automata():
         palabra : str
             DESCRIPTION.
         inicio : str, array like, optional
-            Estado o estados desde los cuales comenzara a calcularse la 
+            Estado o estados desde los cuales comenzara a calcularse la
             transicion extendida, en caso de no recibirse el parametro se
             comienza a tranferir desde los estados iniciales del automata.
             Default None.
@@ -358,7 +480,7 @@ class Automata():
             Conjunto de estados a los que se ha transferido luego de
             verificar la palabra completa. Puede estar vacio en caso de que
             alguna palabra contenga un caracter no propio del alfabeto o bien
-            si al final de las transiciones o en un "estado intermedio" no hay 
+            si al final de las transiciones o en un "estado intermedio" no hay
             estados de salida para con el caracter siguiente a verificar.
 
         """
@@ -370,10 +492,11 @@ class Automata():
         continuar = True
         while continuar:
             inicio = inicio.union(self.__estado_paso_vacio(inicio))
-            edos_paso =set()
+            edos_paso = set()
             try:
                 for edo in inicio:
-                    edos_paso = edos_paso.union(self.transicion(edo, palabra[0]))
+                    edos_paso = edos_paso.union(
+                        self.transicion(edo, palabra[0]))
             except ValueError:
                 return {}
             continuar = 0 < len(edos_paso) and 1 < len(palabra)
@@ -382,15 +505,15 @@ class Automata():
         if 0 == len(edos_paso):
             return {}
         return edos_paso.union(self.__estado_paso_vacio(edos_paso))
-        
-    def __estado_paso_vacio(self, estados) -> set:
+
+    def __estado_paso_vacio(self, estados: Iterable) -> set:
         """
         Devuelve los nodos adyacentes correspondientes a estados a donde se
         puede transferir con entradas de cadena vacia
         Parameters
         ----------
         estados : set
-            Estados de cuales se verifican entradas de cadena vacia que 
+            Estados de cuales se verifican entradas de cadena vacia que
             transfieren a otros estados.
         Returns
         -------
@@ -406,7 +529,7 @@ class Automata():
                 if vt['from'] == edo and caracter_vacio in vt['entradas']]))
         return edos
 
-    def verificar_palabra(self, palabra) -> bool:
+    def verificar_palabra(self, palabra: str) -> bool:
         """
         Verifica si una palabra pertenece o no al lenguaje generado por
         el automata
@@ -427,7 +550,7 @@ class Automata():
     def AFN2AFD(self):
         """
         Forma del automata como automata finito determinista.
-        
+
         La transaformacion se realiza utilizando el metodo planteado en
         Hopcroft, J. et. al. (2007). Introduccion a la Teoria de Automatas,
         Lenguajes y Computacion.
@@ -469,7 +592,7 @@ class Automata():
                         })
         resultado.__remover_inecesarios()
         return resultado
-    
+
     def __remover_inecesarios(self) -> None:
         """
         (De uso interno). Remueve nodos inecerarios en al automata, estos
@@ -505,7 +628,6 @@ class Automata():
             vt
             for vt in self.vertices
             if vt['to'] not in nodosSinSalida]
-        self.__create_graph()
 
     @property
     def candidates2remove(self) -> set:
@@ -526,12 +648,15 @@ class Automata():
         vert2remove = self.estados.difference(vert_in)
         vert_ciclo = set([
             vt['to'] for vt in self.vertices if vt['from'] == vt['to']])
-        vert_in_cicle = set([vt['to'] for vt in self.vertices if vt['from'] != vt['to'] and vt['to'] in vert_ciclo])
+        vert_in_cicle = set([
+            vt['to']
+            for vt in self.vertices
+            if vt['from'] != vt['to'] and vt['to'] in vert_ciclo])
         return vert2remove.union(
             vert_ciclo.difference(vert_in_cicle)
             ).difference(
                 self.estados_iniciales)
-    
+
     @property
     def isAFN(self) -> bool:
         """
@@ -553,7 +678,7 @@ class Automata():
                         else:
                             entradas.append(entrada)
         return False
-    
+
     @property
     def acepta_caracter_vacio(self) -> bool:
         """
@@ -566,8 +691,8 @@ class Automata():
 
         """
         return caracter_vacio in self.alfabeto
-    
-    def __get_entradas(self, nodo_from, nodo_to) -> list:
+
+    def __get_entradas(self, nodo_from: str, nodo_to: str) -> list:
         """
         (De uso interno). Obtiene las diferentes entradas de un nodo a otro,
         las simplifica en caso de que existan multiples vertices
@@ -589,7 +714,7 @@ class Automata():
             if vt['from'] == nodo_from and vt['to'] == nodo_to:
                 aux += vt['entradas']
         return aux
-    
+
     def __reduce_no_finales(self) -> None:
         """
         (De uso interno). Empleado en el calculo de expresiones regulares
@@ -605,6 +730,7 @@ class Automata():
         """
         edos2reduce = self.estados.difference(
             self.estados_iniciales.union(self.estados_finales))
+        edos2reduce = sorted(edos2reduce, key=self.__node_complexity)
         for edo in edos2reduce:
             nodos_ant = set([
                 vt['from']
@@ -615,39 +741,104 @@ class Automata():
                 for vt in self.vertices
                 if vt['from'] == edo and vt['from'] != vt['to']])
             S = entradas2ER(self.__get_entradas(edo, edo))
+            if S:
+                S.requiereClausulaKleene = True
             for nin in nodos_ant:
                 Q = entradas2ER(self.__get_entradas(nin, edo))
                 for nout in nodos_suc:
                     R = entradas2ER(self.__get_entradas(nin, nout))
                     P = entradas2ER(self.__get_entradas(edo, nout))
-                    new_vertice = []
-                    new_vertice_2 = ""
                     if R:
-                        new_vertice.append(R)
                         self.__vertices = [
                             vt
                             for vt in self.vertices
-                            if vt['from'] != nin and vt['to'] != nout]
-                    new_vertice_2 += Q
+                            if vt['from'] != nin or vt['to'] != nout]
+                    new_vertice = deepcopy(Q)
                     if S:
-                        new_vertice_2 += S + "*"
-                    new_vertice_2 += P
-                    if new_vertice_2:
-                        new_vertice.append(new_vertice_2)
-                    self.__vertices.append({
-                        'from': nin, 'to': nout, 'entradas':new_vertice})
+                        new_vertice.concatenarTermino(deepcopy(S))
+                    new_vertice.concatenarTermino(P)
+                    if R:
+                        new_vertice = TerminoER(terminos=[R, new_vertice])
+                        self.__vertices.append({
+                            'from': nin,
+                            'to': nout,
+                            'entradas': new_vertice.terminos})
+                    else:
+                        self.__vertices.append({
+                            'from': nin,
+                            'to': nout,
+                            'entradas': [new_vertice]})
             self.__estados.remove(edo)
             self.__vertices = [
                 vt
                 for vt in self.vertices
                 if vt['from'] != edo and vt['to'] != edo]
-            self.__create_graph()
+
+    def __node_complexity(self, nodo: str) -> str:
+        """
+        (De uso interno). Calcula la complejidad de un nodo para reducirlo
+
+        Parameters
+        ----------
+        nodo : str
+            nodo a reducir.
+
+        Returns
+        -------
+        str
+
+        """
+        toQty = len([
+            vt
+            for vt in self.vertices
+            if vt['from'] == nodo and vt['to'] != vt['from']])
+        fromQty = len([
+            vt
+            for vt in self.vertices
+            if vt['to'] == nodo and vt['to'] != vt['from']])
+        res = f"{toQty + fromQty:04}_{self.__dijkstra(nodo):04}_{nodo}"
+        # res = f"{self.__dijkstra(nodo):04}_{toQty + fromQty:04}_{nodo}"
+        return res
     
+    def __dijkstra(self, origen: str) -> int:
+        """
+        (De uso interno). Implementacion de Dijkstra para calcular distancia
+        de un nodo al nodo de aceptacion. Se mide la distancia en unidades de
+        paso
+
+        Parameters
+        ----------
+        origen : str
+            Nodo Origen.
+
+        Returns
+        -------
+        int.
+
+        """
+        data = dict()
+        for nodo in self.estados:
+            data[nodo] = {
+                'distancia': float('inf'), 'padre': None, 'visto': False}
+        data[origen]['distancia'] = 0
+        cola = [tuple([origen, data[origen]['distancia']]), ]
+        while 0 < len(cola):
+            u = sorted(cola, key=lambda tupla: tupla[1])[0][0]
+            cola.remove(tuple([u, data[u]['distancia']]))
+            data[u]['visto'] = True
+            for v in [vt['to'] for vt in self.vertices if vt['from'] == u]:
+                if not data[v]['visto']:
+                    if data[v]['distancia'] > data[u]['distancia'] + 1:
+                        data[v]['distancia'] = data[u]['distancia'] + 1
+                        data[v]['padre'] = u
+                        cola += [tuple([v, data[v]['distancia']]), ]
+        return min([data[n]['distancia'] for n in self.estados_finales])
+
     @property
     def asRE(self) -> str:
         """
         Expresion regular equivalente al automata. Se calcula de forma "tonta"
-        utilizando el metodo planteado en Hopcroft, J. et. al. (2007). 
+        utilizando el metodo planteado en Hopcroft, J. et. al. (2007).
         Introduccion a la Teoria de Automatas, Lenguajes y Computacion.
 
         Raises
@@ -673,31 +864,27 @@ class Automata():
             autom_tmp.__remover_inecesarios()
             autom_tmp.__reduce_no_finales()
             if edo == nInicial:
-                R = entradas2ER(autom_tmp.__get_entradas(edo, edo))
-                expresiones.append(R + "*")
+                er = entradas2ER(autom_tmp.__get_entradas(edo, edo))
+                er.requiereClausulaKleene = True
             else:
                 R = entradas2ER(autom_tmp.__get_entradas(nInicial, nInicial))
                 S = entradas2ER(autom_tmp.__get_entradas(nInicial, edo))
                 U = entradas2ER(autom_tmp.__get_entradas(edo, edo))
                 T = entradas2ER(autom_tmp.__get_entradas(edo, nInicial))
-                er = ""
-                if R:
-                    er += R
-                SU = ""
-                if S:
-                    SU += S
                 if U:
-                    SU += U + "*"
-                SUT = SU
-                if T:
-                    SUT += T
+                    U.requiereClausulaKleene = True
+                SU = None
+                SUT = None
+                if S:
+                    SU = deepcopy(S)
+                    SU.concatenarTermino(U)
+                    if T:
+                        SUT = deepcopy(SU)
+                        SUT.concatenarTermino(T)
+                er = TerminoER(terminos=[R, SUT], reqKleene=True)
+                if 0 < len(er.terminos):
+                    er.concatenarTermino(SU)
                 else:
-                    SUT = ""
-                if R and SUT:
-                    er += "+"
-                er += SUT
-                if 0 < len(er):
-                    expresiones.append(f"({er})*{SU}")
-                else:
-                    expresiones.append(f"{SU}")
-        return "(" + (")+(".join(set(expresiones))) + ")"
+                    er = SU
+            expresiones.append(er)
+        return str(TerminoER(terminos=expresiones))

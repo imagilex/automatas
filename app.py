@@ -1,19 +1,31 @@
 """
 Funciones necesarias para la ejecucion del automata en un entorno web
-(utilizando flask) para la implementacion de la UI 
+(utilizando flask) para la implementacion de la UI
 """
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory, url_for, redirect
 from Automata import Automata, caracter_vacio
 import site_helpers as hp
+from werkzeug.utils import secure_filename
+from random import randint
+import os
+
+
+UPLOAD_FOLDER = 'data' # /ruta/a/la/carpeta
+ALLOWED_EXTENSIONS = set(['csv'])
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@app.route('/')
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           
+@app.route('/automata-0/')
 def index() -> str:
     """
     Renderizado de la pagina a mostrar en la url root ("/", index) sel sitio
-    
+
     Crea los automatas y valida una serie de palabras aleatorias.
 
     Returns
@@ -33,20 +45,19 @@ def index() -> str:
             {'AFN': automataAFN, 'AFD': automataAFD}),
         car_vacio=caracter_vacio, car_vacio_code=ord(caracter_vacio))
 
+
 @app.route('/test-word/', methods=["GET", "POST"])
 def test_word() -> str:
     """
     Renderizado de la pagina que permite al usuario validad sus propias
     palabras para con el automata
-    
+
     Crea los automatas, valida las palabras ingresadas por el usuario en caso
     de que existan
 
     Returns
     -------
     str
-        DESCRIPTION.
-
     """
     palabras = None
     resultados_pruebas = ""
@@ -69,7 +80,63 @@ def test_word() -> str:
         er_AFN=automataAFN.asRE, er_AFD=automataAFD.asRE,
         palabras=palabras, resultados_pruebas=resultados_pruebas,
         car_vacio=caracter_vacio, car_vacio_code=ord(caracter_vacio),
-        captcha = hp.create_captcha(), right_captcha=right_captcha)
+        captcha=hp.create_captcha(), right_captcha=right_captcha)
+
+@app.route('/', methods=['POST', 'GET'])
+def upload_automata():
+    if request.method == 'POST':
+        estados = request.form['estados']
+        file = request.files['archivo']
+        if file and allowed_file(file.filename):
+            filename = "matriz_nueva.csv"
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('test_automata', estados=estados))
+        else:
+            mensaje= "Extension de archivo no valida"
+            return render_template("upload_automata.html", mensaje=mensaje)
+    else:
+        return render_template("upload_automata.html", mensaje="")
+
+@app.route('/test-automata/', methods=['POST', 'GET'])
+def test_automata():
+    estados = request.args['estados']
+    estado_final = 'q'+estados
+    try:        
+        automataAFN_test= Automata(['q0'], [estado_final],'data/matriz_nueva.csv')
+    except ValueError as e:
+        return render_template(
+            "upload_automata.html",
+            mensaje="El numero de estados no coincide con el seleccionado." + str(e))
+    automataAFD_test = automataAFN_test.AFN2AFD
+    rndnum = randint(1,100000)
+    imgAFN = f"img/autom_{rndnum}_AFN"
+    imgAFD = f"img/autom_{rndnum}_AFD"
+    imgAFN_content = False
+    imgAFD_content = False
+    try:
+        automataAFN_test.save_png(f"static/{imgAFN}")
+    except:
+        with open(f"static/{imgAFN}", "r") as f:
+            imgAFN_content = "".join(f.readlines())
+    try:
+        automataAFD_test.save_png(f"static/{imgAFD}")
+    except:
+        with open(f"static/{imgAFD}", "r") as f:
+            imgAFD_content = "".join(f.readlines())
+    return render_template(
+        "test_automata.html",
+        er_AFN=automataAFN_test.asRE, er_AFD=automataAFD_test.asRE,
+        imgAFD=imgAFD + ".png", imgAFN=imgAFN + ".png",
+        imgAFN_content=imgAFN_content, imgAFD_content=imgAFD_content,
+        resultados_pruebas_test=hp.check_words(
+            hp.mk_test_lst2(automataAFN_test.alfabeto,len(automataAFN_test.estados), 2**len(automataAFN_test.estados), caracter_vacio),
+            {'AFN': automataAFN_test, 'AFD': automataAFD_test}),
+        car_vacio=caracter_vacio, car_vacio_code=ord(caracter_vacio))
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],filename,
+        as_attachment=True,attachment_filename='matriz.csv')
 
 if "__main__" == __name__:
     app.run()

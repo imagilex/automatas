@@ -8,7 +8,7 @@
 __author__ = ["Jorge Alberto Chavez Alderete", "Ruben Ramirez Gomez"]
 __contact__ = [
     "213220158@upmh.edu.mx", "rgomez@upmh.edu.mx", "rramirez@rramirez.com",
-    "213220145@upmh.edu.mx", 
+    "213220145@upmh.edu.mx",
     ]
 __copyright__ = "(c) 2021"
 __license__ = "CC BY-NC-ND"
@@ -17,19 +17,26 @@ __version__ = 1.0
 
 
 import graphviz
+from typing import Optional
+from typing import Iterable
 
 
 class GAutomata():
     """
     Representacion Grafica del automata
     """
-    
+
     __g = None
     __archivo = ""
 
     def __init__(
-            self, titulo="", archivo='automata', direccion="LR",
-            nodos_final=None, nodos_incial=None, nodos=None, vertices=None):
+            self, titulo: Optional[str] = "",
+            archivo: Optional[str] = 'automata',
+            direccion: Optional[str] = "LR",
+            nodos_final: Optional[Iterable] = None,
+            nodos_incial: Optional[Iterable] = None,
+            nodos: Optional[Iterable] = None,
+            vertices: Optional[Iterable] = None):
         """
         Clase para objetos que representan graficamente un automata
 
@@ -78,7 +85,7 @@ class GAutomata():
         if nodos is not None:
             self.agregar_nodos(nodos)
 
-    def agregar_finales(self, nodos):
+    def agregar_finales(self, nodos: Iterable):
         """
         Agregar nodos finales al grafico correspondiente al automata
 
@@ -97,7 +104,7 @@ class GAutomata():
             self.__g.node(nodo)
         self.__g.attr('node', shape='circle')
 
-    def agregar_final(self, nodo):
+    def agregar_final(self, nodo: str):
         """
         Agregar un nodo final al grafico correspondiente al automata
 
@@ -113,7 +120,7 @@ class GAutomata():
         """
         self.agregar_finales([nodo])
 
-    def agregar_iniciales(self, nodos):
+    def agregar_iniciales(self, nodos: Iterable):
         """
         Agregar nodos iniciales al grafico correspondiente al automata
 
@@ -134,7 +141,7 @@ class GAutomata():
             self.__g.edge('inicio', nodo)
         self.__g.attr('node', shape='circle')
 
-    def agregar_inicial(self, nodo):
+    def agregar_inicial(self, nodo: str):
         """
         Agregar un nodo inicial al grafico correspondiente al automata
 
@@ -150,7 +157,7 @@ class GAutomata():
         """
         self.agregar_iniciales([nodo])
 
-    def agregar_nodos(self, nodos):
+    def agregar_nodos(self, nodos: Iterable):
         """
         Agregar nodos no inicial/final al grafico correspondiente al automata
 
@@ -168,7 +175,7 @@ class GAutomata():
         for nodo in nodos:
             self.__g.node(nodo)
 
-    def agregar_nodo(self, nodo) -> None:
+    def agregar_nodo(self, nodo: str) -> None:
         """
         Agregar un nodo no inicial/final al grafico correspondiente al automata
 
@@ -184,7 +191,7 @@ class GAutomata():
         """
         self.agregar_nodos([nodo])
 
-    def agregar_vertices(self, vertices) -> None:
+    def agregar_vertices(self, vertices: Iterable) -> None:
         """
         Agrega vertices al grafico del automata
 
@@ -211,7 +218,7 @@ class GAutomata():
                 vertice[1],
                 label=(vertice[2] if len(vertice) == 3 else ""))
 
-    def agregar_vertice(self, vertice) -> None:
+    def agregar_vertice(self, vertice: Iterable) -> None:
         """
         Agrega un vertice al grafico del automata
 
@@ -243,7 +250,7 @@ class GAutomata():
         """
         self.__g.view(cleanup=True)
 
-    def guardar(self, archivo=None) -> None:
+    def guardar(self, archivo: Optional[str] = None) -> None:
         """
         Guarda el grafico correspondiente al automata en el archivo
         *.png indicado por archivo
